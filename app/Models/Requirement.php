@@ -199,7 +199,7 @@ class Requirement extends Model
                     if ($roles !== false) {
                         return $roles . ' ' . __('can', locale: $locale) . ' ' . $this->name;
                     }
-                } catch (\IntlException) {
+                } catch (\IntlException|\ValueError) {
                     // Fall back to the simple method below.
                 }
             }
