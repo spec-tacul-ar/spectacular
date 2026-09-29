@@ -8,7 +8,7 @@
     ],
     "license": "AGPL-3.0-or-later",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "laravel/folio": "^1.1",
         "laravel/fortify": "^1.25",
         "laravel/framework": "^13.0",
@@ -96,6 +96,9 @@
         "sort-packages": true,
         "allow-plugins": {
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.3.0"
         }
     },
     "minimum-stability": "stable",
