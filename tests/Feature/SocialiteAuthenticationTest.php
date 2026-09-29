@@ -9,6 +9,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User;
 use Mockery;
 use Tests\TestCase;
+use Laravel\Socialite\Two\InvalidStateException;
 
 class SocialiteAuthenticationTest extends TestCase
 {
@@ -51,6 +52,37 @@ class SocialiteAuthenticationTest extends TestCase
             ->assertRedirect('/app');
 
         $this->assertAuthenticatedAs($account, 'web');
+    }
+
+    public function test_socialite_callback_reports_when_email_belongs_to_an_unlinked_account(): void
+    {
+        Account::factory()->create([
+            'email' => 'existing@example.test',
+        ]);
+
+        $this->mockSocialiteUser('github', 'social-123', 'Existing Account', 'existing@example.test');
+
+        $this->get('/auth/github/callback')
+            ->assertStatus(409)
+            ->assertSee('already exists')
+            ->assertSee('not connected to this social login provider');
+    }
+
+    public function test_socialite_callback_shows_an_error_when_the_oauth_state_is_invalid(): void
+    {
+        $socialiteProvider = Mockery::mock(Provider::class);
+        $socialiteProvider->shouldReceive('user')
+            ->once()
+            ->andThrow(new InvalidStateException());
+
+        Socialite::shouldReceive('driver')
+            ->once()
+            ->with('github')
+            ->andReturn($socialiteProvider);
+
+        $this->get('/auth/github/callback')
+            ->assertBadRequest()
+            ->assertSee('Authentication error');
     }
 
     private function mockSocialiteUser(string $provider, string $id, string $name, string $email): void

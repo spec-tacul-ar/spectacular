@@ -36,6 +36,14 @@ class SocialiteController extends Controller
         $account = Account::findBySocial($provider, $social->id);
 
         if (! $account) {
+            $email = $social->getEmail();
+
+            if ($email && Account::findByEmail($email)) {
+                return response()->view('auth.error', [
+                    'message' => "An account with this email address already exists, but it is not connected to this social login provider. Please sign in using your existing method.",
+                ], 409);
+            }
+
             if (! config('spectacular.registration')) {
                 abort(404);
             }
@@ -43,7 +51,7 @@ class SocialiteController extends Controller
             try {
                 $validated = Validator::make([
                     'name' => $social->getName(),
-                    'email' => $social->getEmail(),
+                    'email' => $email,
                 ], [
                     'name' => ['required', 'string', 'max:250'],
                     'email' => ['required', 'email:filter', 'max:250', Rule::unique(Account::class)],
