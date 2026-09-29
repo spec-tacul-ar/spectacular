@@ -45,13 +45,19 @@ class CreateProject
         $project = Project::create($validated);
 
         if (array_key_exists('actors', $validated)) {
-            $actors = array_map(fn($item) => ['name' => $item], $validated['actors']);
+            $actors = collect($validated['actors'])
+                ->values()
+                ->map(fn(string $name, int $weight) => ['name' => $name, 'weight' => $weight])
+                ->all();
 
             $project->actors()->createMany($actors);
         }
 
         if (array_key_exists('features', $validated)) {
-            $features = array_map(fn($item) => ['name' => $item], $validated['features']);
+            $features = collect($validated['features'])
+                ->values()
+                ->map(fn(string $name, int $weight) => ['name' => $name, 'weight' => $weight])
+                ->all();
 
             $project->features()->createMany($features);
         }

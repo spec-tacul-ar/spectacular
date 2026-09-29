@@ -33,12 +33,17 @@ class CreateFeature
             'description' => ['nullable', 'string', 'max:10000'],
             'name' => ['required', 'string', 'max:250'],
             'project_id' => ['required', 'integer', new Authorised('update', Project::class)],
-            'weight' => ['nullable', 'integer', 'between:0,250'],
         ];
     }
 
     public function handle(array $data): Feature
     {
+        $project = Project::withMax('features', 'weight')->findOrFail($data['project_id']);
+
+        $weight = $project->features_max_weight === null ? 0 : $project->features_max_weight + 1;
+
+        $data['weight'] = min($weight, 250);
+
         return Feature::create($data);
     }
 

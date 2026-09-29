@@ -42,15 +42,19 @@ class CreateRequirement
             'tasks' => ['nullable', 'array'],
             'tasks.*.is_complete' => ['nullable', 'boolean'],
             'tasks.*.name' => ['required', 'string', 'max:250'],
-            'tasks.*.weight' => ['nullable', 'integer', 'min:0', 'max:250'],
             'unknowns' => ['nullable', 'array'],
             'unknowns.*.name' => ['required', 'string', 'max:250'],
-            'weight' => ['nullable', 'integer', 'between:0,250'],
         ];
     }
 
     public function handle(array $validated): Requirement
     {
+        $feature = Feature::withMax('requirements', 'weight')->findOrFail($validated['feature_id']);
+
+        $weight = $feature->requirements_max_weight === null ? 0 : $feature->requirements_max_weight + 1;
+
+        $validated['weight'] = min($weight, 250);
+
         $requirement = Requirement::create($validated);
 
         if (!empty($validated['actor_ids'])) {
@@ -62,7 +66,12 @@ class CreateRequirement
         }
 
         if (!empty($validated['tasks'])) {
-            $requirement->tasks()->createMany($validated['tasks']);
+            $tasks = collect($validated['tasks'])
+                ->values()
+                ->map(fn(array $task, int $index) => [...$task, 'weight' => $index])
+                ->all();
+
+            $requirement->tasks()->createMany($tasks);
         }
 
         // We have to fetch a new copy because the reference is set after create.

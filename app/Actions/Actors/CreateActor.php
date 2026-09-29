@@ -33,12 +33,17 @@ class CreateActor
             'name' => ['required', 'string', 'max:250'],
             'project_id' => ['required', 'integer', new Authorised('update', Project::class)],
             'summary' => ['nullable', 'string', 'max:2500'],
-            'weight' => ['nullable', 'integer', 'between:0,250'],
         ];
     }
 
     public function handle(array $validated): Actor
     {
+        $project = Project::withMax('actors', 'weight')->findOrFail($validated['project_id']);
+
+        $weight = $project->actors_max_weight === null ? 0 : $project->actors_max_weight + 1;
+
+        $validated['weight'] = min($weight, 250);
+
         return Actor::create($validated);
     }
 

@@ -45,7 +45,7 @@ class NestedResourcesTest extends TestCase
     public function test_features_endpoints_require_project_edit_access(): void
     {
         $project = Project::factory()->create();
-        $feature = Feature::factory()->for($project)->create(['name' => 'Initial']);
+        $feature = Feature::factory()->for($project)->create(['name' => 'Initial', 'weight' => 5]);
         $requirement = Requirement::factory()->for($feature)->create();
 
         $editor = Account::factory()->create();
@@ -74,14 +74,14 @@ class NestedResourcesTest extends TestCase
             'description' => 'Feature details',
             'name' => 'Workflow',
             'project_id' => $project->sqid,
-            'weight' => 5,
+            'weight' => 0,
         ])->assertCreated();
 
         $createdFeature = Feature::query()->where('name', 'Workflow')->firstOrFail();
         $this->assertDatabaseHas('features', [
             'id' => $createdFeature->id,
             'project_id' => $project->id,
-            'weight' => 5,
+            'weight' => 6,
         ]);
 
         $this->actingAsAccount($viewer);
@@ -117,7 +117,7 @@ class NestedResourcesTest extends TestCase
     public function test_actors_endpoints_require_project_edit_access(): void
     {
         $project = Project::factory()->create();
-        $actor = Actor::factory()->for($project)->create(['name' => 'Initial users']);
+        $actor = Actor::factory()->for($project)->create(['name' => 'Initial users', 'weight' => 5]);
 
         $editor = Account::factory()->create();
         $viewer = Account::factory()->create();
@@ -136,7 +136,7 @@ class NestedResourcesTest extends TestCase
             'name' => 'Operators',
             'project_id' => $project->sqid,
             'summary' => 'Platform users',
-            'weight' => 6,
+            'weight' => 0,
         ])->assertCreated();
 
         $createdActor = Actor::query()->where('name', 'Operators')->firstOrFail();
@@ -186,6 +186,54 @@ class NestedResourcesTest extends TestCase
         $this->assertSoftDeleted('actors', ['id' => $actor->id]);
     }
 
+    public function test_new_actors_are_added_after_existing_actors(): void
+    {
+        $project = Project::factory()->create();
+        $first = Actor::factory()->for($project)->create(['name' => 'First', 'weight' => 5]);
+        $last = Actor::factory()->for($project)->create(['name' => 'Last', 'weight' => 6]);
+        $editor = Account::factory()->create();
+
+        $this->attachCollaboration($editor, $project, Role::EDITOR);
+        $this->actingAsAccount($editor);
+
+        $this->postJson('/api/actors', [
+            'name' => 'New actor',
+            'project_id' => $project->sqid,
+        ])->assertCreated();
+
+        $newActor = Actor::query()->where('name', 'New actor')->firstOrFail();
+
+        $this->assertSame(7, $newActor->weight);
+        $this->assertSame(
+            [$first->id, $last->id, $newActor->id],
+            $project->fresh()->actors->pluck('id')->all(),
+        );
+    }
+
+    public function test_new_features_are_added_after_existing_features(): void
+    {
+        $project = Project::factory()->create();
+        $first = Feature::factory()->for($project)->create(['name' => 'First', 'weight' => 5]);
+        $last = Feature::factory()->for($project)->create(['name' => 'Last', 'weight' => 6]);
+        $editor = Account::factory()->create();
+
+        $this->attachCollaboration($editor, $project, Role::EDITOR);
+        $this->actingAsAccount($editor);
+
+        $this->postJson('/api/features', [
+            'name' => 'New feature',
+            'project_id' => $project->sqid,
+        ])->assertCreated();
+
+        $newFeature = Feature::query()->where('name', 'New feature')->firstOrFail();
+
+        $this->assertSame(7, $newFeature->weight);
+        $this->assertSame(
+            [$first->id, $last->id, $newFeature->id],
+            $project->fresh()->features->pluck('id')->all(),
+        );
+    }
+
     public function test_requirements_add_and_edit_endpoints_require_project_edit_access_and_reject_cross_project_actors(): void
     {
         $project = Project::factory()->create();
@@ -224,6 +272,7 @@ class NestedResourcesTest extends TestCase
         $this->assertDatabaseHas('tasks', [
             'requirement_id' => $createdRequirement->id,
             'name' => 'Write implementation',
+            'weight' => 0,
         ]);
         $this->assertDatabaseHas('unknowns', [
             'requirement_id' => $createdRequirement->id,
@@ -296,6 +345,33 @@ class NestedResourcesTest extends TestCase
             'requirement_id' => $requirement->id,
             'actor_id' => $projectActor->id,
         ]);
+    }
+
+    public function test_new_requirements_are_added_after_existing_requirements(): void
+    {
+        $project = Project::factory()->create();
+        $feature = Feature::factory()->for($project)->create();
+        $first = Requirement::factory()->for($feature)->create(['name' => 'First', 'weight' => 5]);
+        $last = Requirement::factory()->for($feature)->create(['name' => 'Last', 'weight' => 6]);
+        $editor = Account::factory()->create();
+
+        $this->attachCollaboration($editor, $project, Role::EDITOR);
+        $this->actingAsAccount($editor);
+
+        $this->postJson('/api/requirements', [
+            'feature_id' => $feature->sqid,
+            'name' => 'New requirement',
+        ])->assertOk();
+
+        $newRequirement = Requirement::query()
+            ->where('name', 'New requirement')
+            ->firstOrFail();
+
+        $this->assertSame(7, $newRequirement->weight);
+        $this->assertSame(
+            [$first->id, $last->id, $newRequirement->id],
+            $feature->fresh()->requirements->pluck('id')->all(),
+        );
     }
 
     public function test_requirements_complete_and_delete_endpoints_require_project_edit_access(): void

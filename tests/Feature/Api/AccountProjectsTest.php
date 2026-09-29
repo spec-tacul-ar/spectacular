@@ -149,10 +149,10 @@ class AccountProjectsTest extends TestCase
         $account = $this->actingAsAccount();
 
         $response = $this->postJson('/api/projects', [
-            'features' => ['Authentication'],
+            'features' => ['Authentication', 'Invoicing'],
             'locale' => 'fr',
             'name' => 'Roadmap',
-            'actors' => ['Operators'],
+            'actors' => ['Operators', 'Administrators'],
         ]);
 
         $response->assertCreated();
@@ -183,10 +183,22 @@ class AccountProjectsTest extends TestCase
         $this->assertDatabaseHas('actors', [
             'name' => 'Operators',
             'project_id' => $project->id,
+            'weight' => 0,
+        ]);
+        $this->assertDatabaseHas('actors', [
+            'name' => 'Administrators',
+            'project_id' => $project->id,
+            'weight' => 1,
         ]);
         $this->assertDatabaseHas('features', [
             'name' => 'Authentication',
             'project_id' => $project->id,
+            'weight' => 0,
+        ]);
+        $this->assertDatabaseHas('features', [
+            'name' => 'Invoicing',
+            'project_id' => $project->id,
+            'weight' => 1,
         ]);
         $this->assertDatabaseHas('projects', [
             'id' => $project->id,
