@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('requirements', function (Blueprint $table) {
-            $table->boolean('is_draft')->default(false);
+            $table->boolean('is_draft')->default(false)->after('blocked_reason');
         });
     }
 
