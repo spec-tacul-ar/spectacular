@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
 #[Name('ListProjectsTool')]
-#[Description('Returns a list of specifications. Don\'t show the IDs to users unless they ask for them.')]
+#[Description('Lists the specifications available to the current account. Use it to identify the correct specification before calling GetProjectTool. IDs are opaque tool inputs; do not show them to users unless asked.')]
 class ListProjectsTool extends Tool
 {
     /**

@@ -14,7 +14,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
 #[Name('ListProjectAccountsTool')]
-#[Description('Returns a list of accounts assoicated with this project and their IDs. Use this when you need to attribute items in the change history to a specific accounts.')]
+#[Description('Returns the names and IDs of accounts associated with a specification. Use it only when you need to attribute account_id values in item history to collaborators.')]
 class ListProjectAccountsTool extends Tool
 {
     /**
@@ -56,7 +56,7 @@ class ListProjectAccountsTool extends Tool
     {
         return [
             'id' => $schema->string()
-                ->description('The primary identifier for the specification.')
+                ->description('The specification ID returned by ListProjectsTool or GetProjectTool.')
                 ->required(),
         ];
     }

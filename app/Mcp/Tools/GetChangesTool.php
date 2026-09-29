@@ -15,7 +15,12 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
 #[Name('GetChangesTool')]
-#[Description('Returns entities that have changed since the given timestamp.')]
+#[Description(
+    'Returns changes to a specification after a generated_at checkpoint. Use it to refresh previously fetched context. '
+    . 'Existing entities contain only fields changed since that time, new entities are returned in full, and deleted entities contain deleted_at. '
+    . 'Changes to draft requirements and their child items are included, but remain non-actionable. Treat the result as a delta, not a complete specification. '
+    . 'Before acting on any requirement, task, assignment, or unknown in the result, fetch or consult its parent requirement and re-check draft status, blockers, and unknowns.',
+)]
 class GetChangesTool extends Tool
 {
     /**
@@ -70,11 +75,11 @@ class GetChangesTool extends Tool
         return [
 
             'id' => $schema->string()
-                ->description('The primary identifier for the specification.')
+                ->description('The specification ID returned by ListProjectsTool or GetProjectTool.')
                 ->required(),
 
             'since' => $schema->string()
-                ->description("Return records that changed after this ISO 8601 timestamp, usually the last generated_at value.")
+                ->description('An ISO 8601 timestamp. Prefer the latest generated_at value returned by ListProjectsTool or GetProjectTool so no changes are missed.')
                 ->required(),
 
         ];

@@ -21,7 +21,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
 #[Name('GetItemTool')]
-#[Description('Returns the specified entity, optionally including its history.')]
+#[Description(
+    'Returns one specification entity, optionally with revisions after a timestamp. Use it to inspect a changed item or obtain focused detail. '
+    . 'A task, assignment, or unknown does not carry all of its parent requirement context, so fetch the parent requirement before acting and do not work on it when that requirement is a draft.',
+)]
 class GetItemTool extends Tool
 {
     /**
@@ -84,15 +87,15 @@ class GetItemTool extends Tool
         return [
 
             'id' => $schema->string()
-                ->description('The primary identifier for the specification.')
+                ->description('The ID of the entity to return, obtained from another specification tool.')
                 ->required(),
 
             'type' => $schema->string()
-                ->description("The type of item to return. This has to be one of the following: actor, assignment, feature, project, requirement, task, unknown")
+                ->description('The entity type: actor, assignment, feature, project, requirement, task, or unknown.')
                 ->required(),
 
             'since' => $schema->string()
-                ->description("The ISO 8601 timestamp from which to return the item's change history. Leave blank when no history is needed.")
+                ->description("An optional ISO 8601 timestamp. When provided, the response includes revisions after this time in history; omit it when only the entity's current state is needed.")
                 ->nullable(),
 
         ];

@@ -19,7 +19,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
 #[Name('SetRequirementCompletionTool')]
-#[Description('Marks an unblocked requirement as complete, clearing its draft status, or reopens it.')]
+#[Description(
+    'Marks an unblocked requirement complete or reopens it. Call this only after checking the current requirement and only when the user-authorized work has been implemented and verified. '
+    . 'Do not use it to advance a draft requirement: completing one clears its draft status. Task completion alone does not establish requirement completion.',
+)]
 class SetRequirementCompletionTool extends Tool
 {
     public function handle(Request $request): Response|ResponseFactory
@@ -60,10 +63,10 @@ class SetRequirementCompletionTool extends Tool
     {
         return [
             'id' => $schema->string()
-                ->description('The primary identifier for the requirement.')
+                ->description('The requirement ID returned by GetProjectTool, GetItemTool, or GetChangesTool.')
                 ->required(),
             'is_complete' => $schema->boolean()
-                ->description('True to mark the requirement complete; false to reopen it.')
+                ->description('True to mark a verified, non-draft requirement complete; false to reopen a requirement.')
                 ->required(),
         ];
     }

@@ -15,7 +15,11 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
 #[Name('GetProjectTool')]
-#[Description('Returns a full specification, including the boolean is_draft status on requirements. Do not work on draft requirements or their tasks.')]
+#[Description(
+    'Returns the complete current specification: project context, actors, features, requirements, assignments, tasks, blockers, and unknowns. '
+    . 'Read it before planning or implementation. A requirement is actionable only when is_draft is false. Draft requirements and their tasks are tentative, may change, and only hint at future direction; do not work on them. '
+    . 'Surface relevant blocked_reason and unknowns instead of guessing, and retain generated_at as the checkpoint for GetChangesTool.',
+)]
 class GetProjectTool extends Tool
 {
     /**
@@ -97,7 +101,7 @@ class GetProjectTool extends Tool
     {
         return [
             'id' => $schema->string()
-                ->description('The primary identifier for the specification.')
+                ->description('The specification ID returned by ListProjectsTool.')
                 ->required(),
         ];
     }
