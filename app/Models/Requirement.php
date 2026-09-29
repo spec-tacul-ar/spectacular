@@ -68,7 +68,7 @@ class Requirement extends Model
         });
 
         static::saved(function ($requirement) {
-            if ($requirement->wasChanged('completed_at')) {
+            if ($requirement->activity_at !== null && $requirement->wasChanged('completed_at')) {
                 $requirement->handleActivity();
 
                 return;

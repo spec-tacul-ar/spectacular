@@ -13,6 +13,24 @@ class RequirementCompletionTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_creating_a_blocked_requirement_initializes_activity_without_completing_it(): void
+    {
+        $this->travelTo('2026-08-18 10:00:00');
+
+        $requirement = Requirement::factory()
+            ->for(Feature::factory()->for(Project::factory()))
+            ->create(['blocked_reason' => 'Waiting on access'])
+            ->fresh();
+
+        $this->assertNotNull($requirement->activity_at);
+        $this->assertTrue($requirement->activity_at->equalTo(now()));
+        $this->assertNull($requirement->completed_at);
+        $this->assertTrue($requirement->is_blocked);
+        $this->assertFalse($requirement->is_complete);
+
+        $this->travelBack();
+    }
+
     public function test_completion_is_based_on_completed_at_being_after_activity_at(): void
     {
         $this->travelTo('2026-08-18 10:00:00');
