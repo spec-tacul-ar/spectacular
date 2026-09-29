@@ -100,6 +100,7 @@ class ExportController
                             'blocked_reason' => $requirement->blocked_reason,
                             'activity_at' => $requirement->activity_at,
                             'completed_at' => $requirement->completed_at,
+                            'is_draft' => $requirement->is_draft,
                             'source' => $requirement->source,
                             'reference' => $requirement->reference,
                             'weight' => $requirement->weight,

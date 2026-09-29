@@ -275,6 +275,7 @@ class SpecificationsToolTest extends TestCase
                 ->has('features.0.requirements.0.completed_at')
                 ->has('features.0.requirements.0.activity_at')
                 ->where('features.0.requirements.0.is_complete', false)
+                ->where('features.0.requirements.0.is_draft', false)
                 ->where('features.0.requirements.0.assignments.0.actor_id', $fixture['projectActor']->sqid)
                 ->where('features.0.requirements.0.tasks.0.id', $fixture['task']->sqid)
                 ->where('features.0.requirements.0.unknowns.0.id', $fixture['unknown']->sqid)
@@ -296,12 +297,12 @@ class SpecificationsToolTest extends TestCase
             ->assertHasErrors(['Project not found.']);
     }
 
-    public function test_requirement_completion_tool_marks_an_unblocked_requirement_complete_and_reopens_it(): void
+    public function test_requirement_completion_tool_completes_a_draft_and_reopens_it(): void
     {
         $this->travelTo('2026-08-18 10:00:00');
 
         $fixture = $this->createProjectFixture();
-        $fixture['requirement']->update(['blocked_reason' => null]);
+        $fixture['requirement']->update(['blocked_reason' => null, 'is_draft' => true]);
 
         $this->travelTo('2026-08-18 10:01:00');
 
@@ -315,6 +316,7 @@ class SpecificationsToolTest extends TestCase
                 fn(AssertableJson $json) => $json
                     ->where('id', $fixture['requirement']->sqid)
                     ->where('is_complete', true)
+                    ->where('is_draft', false)
                     ->has('completed_at')
                     ->has('activity_at'),
             );
@@ -346,6 +348,7 @@ class SpecificationsToolTest extends TestCase
                     ->where('id', $fixture['requirement']->sqid)
                     ->where('completed_at', null)
                     ->where('is_complete', false)
+                    ->where('is_draft', false)
                     ->has('activity_at'),
             );
 
@@ -357,7 +360,7 @@ class SpecificationsToolTest extends TestCase
     public function test_requirement_completion_tool_rejects_blocked_requirements(): void
     {
         $fixture = $this->createProjectFixture();
-        $fixture['requirement']->update(['blocked_reason' => 'Waiting on access']);
+        $fixture['requirement']->update(['blocked_reason' => 'Waiting on access', 'is_draft' => true]);
 
         SpecificationsServer::actingAs($fixture['account'])
             ->tool(SetRequirementCompletionTool::class, [
@@ -367,6 +370,7 @@ class SpecificationsToolTest extends TestCase
             ->assertHasErrors(['Requirements cannot be completed while blocked.']);
 
         $this->assertNull($fixture['requirement']->fresh()->completed_at);
+        $this->assertTrue($fixture['requirement']->fresh()->is_draft);
     }
 
     public function test_requirement_completion_tool_requires_edit_access(): void

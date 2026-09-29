@@ -112,6 +112,7 @@ class AccountProjectsTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.0.name', 'Alpha');
         $response->assertJsonPath('data.0.requirements_count', 3);
+        $response->assertJsonPath('data.0.non_draft_requirements_count', 3);
         $response->assertJsonPath('data.0.blocked_requirements_count', 1);
         $response->assertJsonPath('data.0.unknowns_count', 1);
         $response->assertJsonPath('data.0.tasks_count', 3);
@@ -123,6 +124,53 @@ class AccountProjectsTest extends TestCase
         $response->assertJsonMissingPath('data.0.collaborations.0.account_name');
         $response->assertJsonPath('data.1.name', 'Beta');
         $response->assertJsonPath('meta.total', 2);
+    }
+
+    public function test_project_progress_counts_explicit_completion_and_excludes_drafts(): void
+    {
+        $fixture = $this->createProjectFixture();
+        $this->actingAsAccount($fixture['account']);
+
+        foreach ([false, true] as $is_draft) {
+            foreach ([false, true] as $tasks_complete) {
+                $requirement = Requirement::factory()->for($fixture['feature'])->create([
+                    'is_draft' => $is_draft,
+                    'blocked_reason' => null,
+                ]);
+                Task::factory()->for($requirement)->create(['is_complete' => $tasks_complete]);
+            }
+        }
+
+        $completed = Requirement::factory()->for($fixture['feature'])->create(['blocked_reason' => null]);
+        $completed->forceFill(['activity_at' => now()->subMinute(), 'completed_at' => now()])->saveQuietly();
+
+        $this->getJson('/api/projects')->assertOk()
+            ->assertJsonPath('data.0.requirements_count', 6)
+            ->assertJsonPath('data.0.non_draft_requirements_count', 4)
+            ->assertJsonPath('data.0.completed_requirements_count', 1)
+            ->assertJsonMissingPath('data.0.requirements_with_tasks_count')
+            ->assertJsonMissingPath('data.0.requirements_all_tasks_complete_count');
+
+        $fixture['requirement']->update(['is_draft' => true]);
+
+        $this->getJson('/api/projects')->assertOk()
+            ->assertJsonPath('data.0.requirements_count', 6)
+            ->assertJsonPath('data.0.non_draft_requirements_count', 3)
+            ->assertJsonPath('data.0.completed_requirements_count', 1);
+    }
+
+    public function test_project_with_only_draft_requirements_has_zero_progress_counts(): void
+    {
+        $fixture = $this->createProjectFixture();
+        $this->actingAsAccount($fixture['account']);
+        $fixture['requirement']->update(['is_draft' => true]);
+        $fixture['task']->update(['is_complete' => true]);
+
+        $this->getJson('/api/projects')->assertOk()
+            ->assertJsonPath('data.0.requirements_count', 1)
+            ->assertJsonPath('data.0.tasks_count', 1)
+            ->assertJsonPath('data.0.non_draft_requirements_count', 0)
+            ->assertJsonPath('data.0.completed_requirements_count', 0);
     }
 
     public function test_projects_browse_endpoint_does_not_include_projects_without_collaborations(): void

@@ -77,6 +77,10 @@ export default class Requirement extends Model {
     get is_filtered() {
         const filters = this.feature.project.filters;
 
+        if (typeof filters.statuses.draft === 'boolean' && this.is_draft !== filters.statuses.draft) {
+            return true;
+        }
+
         if (typeof filters.statuses.completed === 'boolean' && this.is_complete !== filters.statuses.completed) {
             return true;
         }

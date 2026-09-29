@@ -5,6 +5,7 @@ namespace App\Actions\Requirements;
 use Illuminate\Auth\Access\Response as GateResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Routing\Router;
+use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\ActionRequest;
 use Lorisleiva\Actions\Concerns\AsAction;
 use App\Http\Resources\RequirementResource;
@@ -48,6 +49,7 @@ class EditRequirement
             'blocked_reason' => ['present', 'nullable', 'string', 'max:250'],
             'description' => ['present', 'nullable', 'string', 'max:10000'],
             'feature_id' => ['bail', 'required', 'integer', new Authorised('update', Feature::class)],
+            'is_draft' => ['sometimes', 'boolean'],
             'name' => ['required', 'string', 'max:250'],
             'source' => ['present', 'nullable', 'string', 'max:250'],
             'tasks' => ['present', 'array'],
@@ -78,6 +80,12 @@ class EditRequirement
 
     public function handle(Requirement $requirement, array $validated): Requirement
     {
+        if (!empty($validated['is_draft']) && !$requirement->is_draft && $requirement->is_complete) {
+            throw ValidationException::withMessages([
+                'is_draft' => 'Completed requirements cannot be marked as draft.',
+            ]);
+        }
+
         $requirement->update($validated);
 
         if (array_key_exists('actor_ids', $validated)) {

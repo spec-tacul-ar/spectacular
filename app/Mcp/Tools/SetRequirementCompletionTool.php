@@ -19,7 +19,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
 #[Name('SetRequirementCompletionTool')]
-#[Description('Marks an unblocked requirement as complete or reopens it.')]
+#[Description('Marks an unblocked requirement as complete, clearing its draft status, or reopens it.')]
 class SetRequirementCompletionTool extends Tool
 {
     public function handle(Request $request): Response|ResponseFactory
@@ -52,6 +52,7 @@ class SetRequirementCompletionTool extends Tool
             'activity_at' => $requirement->activity_at,
             'completed_at' => $requirement->completed_at,
             'is_complete' => $requirement->is_complete,
+            'is_draft' => $requirement->is_draft,
         ]);
     }
 

@@ -26,9 +26,9 @@
                 </Tooltip>
 
                 <template v-if="project.requirements_count && !project.archived_at">
-                    <Tooltip v-if="project.requirements_count > 0" text="Completed">
+                    <Tooltip v-if="project.non_draft_requirements_count > 0" text="Completed">
                         <div class="inline-flex gap-2 leading-none px-1 pr-2 h-6 text-sm rounded-full items-center bg-green-100 text-green-500 cursor-default dark:bg-green-950 dark:text-green-300">
-                            <IconSet name="success" /> {{ Math.round((project.completed_requirements_count / project.requirements_count) * 100) }}%
+                            <IconSet name="success" /> {{ Math.round((project.completed_requirements_count / project.non_draft_requirements_count) * 100) }}%
                         </div>
                     </Tooltip>
 

@@ -26,22 +26,33 @@ class Requirement extends Model
 
     protected $appends = ['title'];
 
+    protected $attributes = [
+        'is_draft' => false,
+    ];
+
     protected $casts = [
         'actor_id' => 'integer',
         'actor_sqid' => AsSqid::class,
         'completed_at' => 'datetime',
         'feature_sqid' => AsSqid::class,
+        'is_draft' => 'boolean',
     ];
 
     protected $fillable = [
         'blocked_reason',
         'description',
+        'is_draft',
         'name',
         'feature_id',
         'source',
         'actor_id',
         'weight',
     ];
+
+    public function scopeDraft($query, bool $is_draft = true)
+    {
+        return $query->where($query->qualifyColumn('is_draft'), $is_draft);
+    }
 
     protected static function booted(): void
     {
@@ -203,6 +214,7 @@ class Requirement extends Model
 
     public function complete(): void
     {
+        $this->is_draft = false;
         $this->completed_at = now();
         $this->save();
     }

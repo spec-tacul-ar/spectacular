@@ -78,7 +78,7 @@
 
         <h3>Completion</h3>
 
-        <p>Use the requirement's dropdown menu to mark it as complete or reopen it. A blocked requirement cannot be marked as complete.</p>
+        <p>Use the requirement's dropdown menu to mark it as complete or reopen it. A blocked requirement cannot be marked as complete. The menu hides this action for drafts, but API completion requests automatically remove draft status.</p>
 
         <p>Completion is independent of task progress. If the requirement or one of its related items changes after it was completed, the requirement is considered incomplete until it is marked complete again.</p>
 
@@ -129,6 +129,12 @@
         <h4 id="resolving-unknowns">Resolving unknowns</h4>
 
         <p>Each unknown can be quickly marked as resolved using its dropdown menu. This will show a modal where you can append the clarification to the requirement description.</p>
+
+        <h4 id="drafts">Draft requirements</h4>
+
+        <p>Mark a requirement as draft when it needs more detail or belongs to a later phase. Completed requirements cannot be marked as draft. Requirements can be both draft and blocked. Drafts are excluded from the project completion percentage, which includes all non-draft requirements regardless of their tasks.</p>
+
+        <p>When AI agents read the specification through MCP, they should not work on draft requirements or their tasks.</p>
 
         <h2 id="deleting">Deleting requirements</h2>
 

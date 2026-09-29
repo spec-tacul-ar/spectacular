@@ -28,7 +28,8 @@ class IndexProjects
                 'requirements as blocked_requirements_count' => fn($query) => $query->whereNotNull('blocked_reason'),
                 'unknowns',
                 'tasks',
-                'requirements as completed_requirements_count' => fn($query) => $query->completed(),
+                'requirements as non_draft_requirements_count' => fn($query) => $query->draft(false),
+                'requirements as completed_requirements_count' => fn($query) => $query->draft(false)->completed(),
             ])
             ->with(['collaborations' => fn($query) => $query->whereBelongsTo($account)])
             ->orderBy('name', 'asc')

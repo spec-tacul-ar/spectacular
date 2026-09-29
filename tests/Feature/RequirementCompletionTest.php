@@ -84,6 +84,30 @@ class RequirementCompletionTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_completing_a_draft_without_tasks_clears_draft_in_one_save(): void
+    {
+        $this->travelTo('2026-08-18 10:00:00');
+        $requirement = Requirement::factory()
+            ->for(Feature::factory()->for(Project::factory()))
+            ->create(['is_draft' => true, 'blocked_reason' => null]);
+        $activity_at = $requirement->activity_at->toJSON();
+
+        $this->travelTo('2026-08-18 10:01:00');
+        $requirement->complete();
+        $requirement->refresh();
+
+        $this->assertFalse($requirement->is_draft);
+        $this->assertTrue($requirement->is_complete);
+        $this->assertSame($activity_at, $requirement->activity_at->toJSON());
+        $this->assertSame(now()->toJSON(), $requirement->completed_at->toJSON());
+        $this->assertSame(0, $requirement->tasks()->count());
+
+        $this->travelTo('2026-08-18 10:02:00');
+        $requirement->update(['description' => 'More detail']);
+        $this->assertFalse($requirement->fresh()->is_complete);
+        $this->travelBack();
+    }
+
     public function test_blocking_a_requirement_clears_completed_at(): void
     {
         $this->travelTo('2026-08-18 10:00:00');

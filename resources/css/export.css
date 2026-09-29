@@ -132,6 +132,14 @@ hr {
     @apply p-1 rounded;
 }
 
+.requirement-draft {
+    @apply opacity-75;
+}
+
+.status-draft {
+    @apply bg-gray-400 text-white;
+}
+
 .status-complete {
     @apply bg-green-400 text-white;
 }

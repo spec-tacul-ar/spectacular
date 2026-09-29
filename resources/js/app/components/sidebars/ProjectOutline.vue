@@ -8,12 +8,13 @@
 
             <ol class="space-y-4">
                 <li v-for="requirement in sortRequirements(feature.requirements)" :key="requirement.id" class="flex items-center gap-2">
-                    <div v-if="requirement.is_blocked" class="size-2 shrink-0 rounded-full bg-red-400 dark:bg-red-950"></div>
-                    <div v-else-if="requirement.unknowns.isNotEmpty()" class="size-2 shrink-0 rounded-full bg-orange-400"></div>
-                    <div v-else-if="requirement.is_complete" class="size-2 shrink-0 rounded-full bg-green-400 dark:bg-green-950"></div>
+                    <div v-if="requirement.is_draft" class="size-2 shrink-0 rounded-full bg-gray-400 dark:bg-gray-500" title="Draft" role="img" aria-label="Draft"></div>
+                    <div v-else-if="requirement.is_blocked" class="size-2 shrink-0 rounded-full bg-red-400 dark:bg-red-950" title="Blocked" role="img" aria-label="Blocked"></div>
+                    <div v-else-if="requirement.is_complete" class="size-2 shrink-0 rounded-full bg-green-400 dark:bg-green-500" title="Complete" role="img" aria-label="Complete"></div>
+                    <div v-else-if="requirement.unknowns.isNotEmpty()" class="size-2 shrink-0 rounded-full bg-orange-400" title="Has unknowns" role="img" aria-label="Has unknowns"></div>
                     <div v-else class="size-2 shrink-0"></div>
 
-                    <a :href="'#requirement_' + requirement.id" class="text-sm leading-tight" @click.prevent="scroll">{{ formatName(requirement.name) }}</a>
+                    <a :href="'#requirement_' + requirement.id" class="text-sm leading-tight" :class="{ 'opacity-75': requirement.is_draft }" @click.prevent="scroll">{{ formatName(requirement.name) }}</a>
                 </li>
             </ol>
         </li>

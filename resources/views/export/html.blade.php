@@ -41,13 +41,14 @@
                         @if ($feature->requirements->isNotEmpty())
                             <div class="requirements">
                                 @foreach ($feature->requirements as $requirement)
-                                    <div class="requirement">
+                                    <div @class(['requirement', 'requirement-draft' => $requirement->is_draft])>
                                         <h4>
                                             {{ $requirement->title }}
-                                            @if ($requirement->is_blocked)
+                                            @if ($requirement->is_draft)
+                                                <span class="status status-draft">{{ __('Draft', locale: $project->locale) }}</span>
+                                            @elseif ($requirement->is_blocked)
                                                 <span class="status status-blocked">{{ __('Blocked', locale: $project->locale) }}</span>
-                                            @endif
-                                            @if (!$requirement->is_blocked && $requirement->is_complete)
+                                            @elseif ($requirement->is_complete)
                                                 <span class="status status-complete">{{ __('Complete', locale: $project->locale) }}</span>
                                             @endif
                                         </h4>

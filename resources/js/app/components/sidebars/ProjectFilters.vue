@@ -16,6 +16,13 @@
 
             <div class="mb-4">
                 <FilterSwitch
+                    :value="filters.statuses.draft"
+                    @change="filters.setFilter('statuses', 'draft', $event)">
+
+                    Draft
+                </FilterSwitch>
+
+                <FilterSwitch
                     :value="filters.statuses.completed"
                     @change="filters.setFilter('statuses', 'completed', $event)">
 

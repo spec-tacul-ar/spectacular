@@ -5,7 +5,7 @@
         </RouterLink>
 
         <DropdownMenu>
-            <DropdownMenuItem v-if="project.can_write && !requirement.is_blocked && !requirement.is_complete" type="button" :loading="is_waiting" icon="check-lg" @click.stop="markComplete()">Mark complete</DropdownMenuItem>
+            <DropdownMenuItem v-if="project.can_write && !requirement.is_draft && !requirement.is_blocked && !requirement.is_complete" type="button" :loading="is_waiting" icon="check-lg" @click.stop="markComplete()">Mark complete</DropdownMenuItem>
             <DropdownMenuItem v-if="project.can_write && requirement.is_complete" type="button" :loading="is_waiting" icon="x-lg" @click.stop="reopen()">Reopen</DropdownMenuItem>
             <DropdownMenuItem v-if="project.can_write && requirement.is_blocked" type="button" :loading="is_waiting" icon="unblock" @click.stop="unblock()">Unblock</DropdownMenuItem>
             <DropdownMenuItem :to="{ name: 'projects.requirements.feedback', params: { requirement_id: requirement.id }}" icon="feedback">Feedback</DropdownMenuItem>

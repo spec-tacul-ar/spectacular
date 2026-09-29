@@ -1,11 +1,12 @@
 <template>
     <article
         v-if="!this.requirement.is_filtered" :id="'requirement_' + requirement.id"
-        class="relative">
+        class="relative" :class="{ 'opacity-75': requirement.is_draft }">
 
         <div class="absolute -top-4 right-10 flex gap-2">
-            <span class="bg-red-400 text-white rounded-full px-4 py-1 dark:bg-red-950 dark:text-red-100" v-if="requirement.is_blocked">{{ $t('Blocked', project.locale) }}</span>
-            <span class="bg-green-400 text-white rounded-full px-4 py-1 dark:bg-green-950 dark:text-green-100" v-if="requirement.is_complete && !requirement.is_blocked">{{ $t('Complete', project.locale) }}</span>
+            <span class="bg-gray-400 text-white rounded-full px-4 py-1 dark:bg-gray-700 dark:text-gray-100" v-if="requirement.is_draft">{{ $t('Draft', project.locale) }}</span>
+            <span class="bg-red-400 text-white rounded-full px-4 py-1 dark:bg-red-950 dark:text-red-100" v-else-if="requirement.is_blocked">{{ $t('Blocked', project.locale) }}</span>
+            <span class="bg-green-400 text-white rounded-full px-4 py-1 dark:bg-green-950 dark:text-green-100" v-else-if="requirement.is_complete">{{ $t('Complete', project.locale) }}</span>
         </div>
 
         <div

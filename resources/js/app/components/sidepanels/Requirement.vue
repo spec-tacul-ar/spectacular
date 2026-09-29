@@ -196,6 +196,13 @@
 
                 <button type="button" class="btn btn-primary btn-sm mt-2" v-on:click="addUnknown()">{{ form.unknowns.length ? 'Add another unknown' : 'Add unknown' }}</button>
             </fieldset>
+            <div class="mt-6">
+                <FormInput type="checkbox" :id="elementId('is_draft')" label="This requirement is a draft." :error="errors.is_draft" v-model="form.is_draft" :disabled="!form.is_draft && !requirement?.is_draft && is_complete">
+                    <template #help>
+                        <p>Use drafts for requirements that need more detail or belong to a later phase.</p>
+                    </template>
+                </FormInput>
+            </div>
         </form>
     </SidepanelLayout>
 </template>
@@ -242,6 +249,9 @@ export default {
         ValidationMessages,
     },
     computed: {
+        is_complete() {
+            return this.requirement?.is_complete ?? false;
+        },
         features() {
             return this.project.features.sortBy('weight').all();
         },
@@ -271,6 +281,7 @@ export default {
                 description: this.requirement?.description,
                 feature_id: this.requirement?.feature_id ?? this.feature_id ?? null,
                 is_blocked: this.requirement?.is_blocked,
+                is_draft: this.requirement?.is_draft ?? false,
                 name: this.requirement?.name,
                 unknowns: this.requirement ? this.requirement.unknowns.all().map(unknown => ({ ...unknown })) : [],
                 source: this.requirement?.source,
@@ -351,6 +362,7 @@ export default {
                         this.form.blocked_reason = '';
                         this.form.description = '';
                         this.form.is_blocked = false;
+                        this.form.is_draft = false;
                         this.form.name = '';
                         this.form.unknowns = [];
                         this.form.source = '';

@@ -37,6 +37,7 @@ class CreateRequirement
             'blocked_reason' => ['nullable', 'string', 'max:250'],
             'description' => ['nullable', 'string', 'max:10000'],
             'feature_id' => ['required', 'integer', new Authorised('update', Feature::class)],
+            'is_draft' => ['sometimes', 'boolean'],
             'name' => ['required', 'string', 'max:250'],
             'source' => ['nullable', 'string', 'max:250'],
             'tasks' => ['nullable', 'array'],

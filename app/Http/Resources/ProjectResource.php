@@ -26,6 +26,7 @@ class ProjectResource extends JsonResource
             'invitations' => InvitationResource::collection($this->whenLoaded('invitations')),
 
             'requirements_count' => $this->requirements_count,
+            'non_draft_requirements_count' => $this->non_draft_requirements_count,
             'blocked_requirements_count' => $this->blocked_requirements_count,
             'unknowns_count' => $this->unknowns_count,
             'tasks_count' => $this->tasks_count,

@@ -15,7 +15,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
 #[Name('GetProjectTool')]
-#[Description('Returns a full specification.')]
+#[Description('Returns a full specification, including the boolean is_draft status on requirements. Do not work on draft requirements or their tasks.')]
 class GetProjectTool extends Tool
 {
     /**
@@ -64,6 +64,7 @@ class GetProjectTool extends Tool
                     'activity_at' => $requirement->activity_at,
                     'completed_at' => $requirement->completed_at,
                     'is_complete' => $requirement->is_complete,
+                    'is_draft' => $requirement->is_draft,
                     'reference' => $requirement->reference,
                     'source' => $requirement->source,
                     'assignments' => $requirement->assignments->map(fn($assignment) => [

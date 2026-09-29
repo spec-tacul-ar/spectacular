@@ -14,6 +14,7 @@ class RequirementResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'blocked_reason' => $this->blocked_reason,
+            'is_draft' => $this->is_draft,
             'feature_id' => $this->feature_sqid,
             'reference' => $this->reference,
             'source' => $this->source,

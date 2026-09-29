@@ -20,7 +20,7 @@
 {{----}}{{----}}
 {{----}}{{----}}{{ $feature->description ? Str::htmlToMarkdown($feature->description) . "\n" : '' }}
 {{----}}{{----}}@foreach ($feature->requirements as $requirement)
-{{----}}{{----}}{{----}}#### ({{ $requirement->reference }}) {{ Str::escapeMarkdown($requirement->title) }}{{ $requirement->is_complete && !$requirement->is_blocked ? ' [' . __('Complete', locale: $project->locale) . ']' : null }}
+{{----}}{{----}}{{----}}#### ({{ $requirement->reference }}) {{ Str::escapeMarkdown($requirement->title) }}{{ $requirement->is_draft ? ' [' . __('Draft', locale: $project->locale) . ']' : ($requirement->is_complete && !$requirement->is_blocked ? ' [' . __('Complete', locale: $project->locale) . ']' : null) }}
 {{----}}{{----}}{{----}}{{ $requirement->is_blocked ? "\n" . '**[' . __('Blocked', locale: $project->locale) . '] ' . Str::escapeMarkdown($requirement->blocked_reason) . '**' . "\n" : '' }}
 {{----}}{{----}}{{----}}{{ $requirement->description ? Str::htmlToMarkdown($requirement->description) . "\n" : '' }}
 {{----}}{{----}}{{----}}{{ $requirement->source ? '*' . __('Source', locale: $project->locale) . ': ' . Str::escapeMarkdown($requirement->source) . '*' . "\n" : '' }}
