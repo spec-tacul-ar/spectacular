@@ -60,7 +60,7 @@ export default {
     },
     computed: {
         mcp_endpoint() {
-            return window.location.origin . '/mcp/specifications';
+            return window.location.origin + '/mcp/specifications';
         },
         tokens() {
             return Token.repository().collection.sortBy(token => token.name.toLocaleLowerCase());
