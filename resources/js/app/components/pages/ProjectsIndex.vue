@@ -6,7 +6,14 @@
             <div class="flex justify-between flex-wrap items-end gap-4 mb-4 sm:pl-4">
                 <h1 class="font-display font-semibold text-4xl">Projects</h1>
                 
-                <RouterLink v-if="!is_loading_projects && projects.isNotEmpty()" :to="{ name: 'projects.create' }" class="btn btn-primary">Create project</RouterLink>
+                <SplitButton v-if="!is_loading_projects && projects.isNotEmpty()">
+                    <template #button>
+                        <RouterLink :to="{ name: 'projects.create' }" class="btn btn-primary rounded-r-none">Create project</RouterLink>
+                    </template>
+
+                    <DropdownMenuItem icon="plus-lg" :loading="is_creating_blank_project" :disabled="is_creating_blank_project || is_creating_demo_project" @click="createBlankProject">Blank project</DropdownMenuItem>
+                    <DropdownMenuItem icon="plus-lg" :loading="is_creating_demo_project" :disabled="is_creating_blank_project || is_creating_demo_project" @click="createDemoProject">Lucia's Restaurant</DropdownMenuItem>
+                </SplitButton>
             </div>
 
             <LoadingSpinner label="Loading projects" v-if="is_loading_projects" />
@@ -22,11 +29,18 @@
                 <p>Get started by creating your first project.</p>
 
                 <div class="flex flex-wrap items-center justify-center gap-4">
-                    <RouterLink :to="{ name: 'projects.create' }" class="btn btn-primary">Create project</RouterLink>
+                    <SplitButton>
+                        <template #button>
+                            <RouterLink :to="{ name: 'projects.create' }" class="btn btn-primary rounded-r-none">Create project</RouterLink>
+                        </template>
+
+                        <DropdownMenuItem icon="plus-lg" :loading="is_creating_blank_project" :disabled="is_creating_blank_project || is_creating_demo_project" @click="createBlankProject">Blank project</DropdownMenuItem>
+                    </SplitButton>
 
                     <SpinnerButton
                         type="button"
                         class="btn btn-primary-outline"
+                        :disabled="is_creating_blank_project"
                         :loading="is_creating_demo_project"
                         @click="createDemoProject">
                         Create demo project
@@ -58,13 +72,15 @@
 import Announcements from '@/components/Announcements.vue';
 import Card from '@/components/Card.vue';
 import DefaultLayout from '@/components/layouts/DefaultLayout.vue';
+import DropdownMenuItem from '@/components/DropdownMenuItem.vue';
 import IconSet from '@/components/IconSet.vue';
 import Invitation from '@/stores/models/Invitation';
 import InvitationItem from '@/components/items/InvitationItem.vue';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ProjectItem from '@/components/items/ProjectItem.vue';
-import SpinnerButton from '@/components/SpinnerButton.vue';
 import Project from '@/stores/models/Project';
+import SplitButton from '@/components/SplitButton.vue';
+import SpinnerButton from '@/components/SpinnerButton.vue';
 import { useAuthStore } from '@/stores';
 
 export default {
@@ -72,14 +88,17 @@ export default {
         Announcements,
         Card,
         DefaultLayout,
+        DropdownMenuItem,
         IconSet,
         InvitationItem,
         LoadingSpinner,
         ProjectItem,
+        SplitButton,
         SpinnerButton,
     },
     data() {
         return {
+            is_creating_blank_project: false,
             is_creating_demo_project: false,
             is_loading_projects: false,
         };
@@ -116,6 +135,19 @@ export default {
             });
     },
     methods: {
+        createBlankProject() {
+            this.is_creating_blank_project = true;
+
+            this.api.post('projects', { name: 'Blank project' })
+                .then((result) => {
+                    const project = result.data;
+
+                    Project.repository().save(project);
+
+                    this.$router.push({ name: 'projects.show', params: { project_id: project.id } });
+                })
+                .finally(() => this.is_creating_blank_project = false);
+        },
         createDemoProject() {
             this.is_creating_demo_project = true;
 

@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
@@ -172,8 +171,6 @@ class Project extends Model
             'features.*.requirements.*.name' => ['nullable', 'string'],
             'features.*.requirements.*.description' => ['nullable', 'string'],
             'features.*.requirements.*.blocked_reason' => ['nullable', 'string'],
-            'features.*.requirements.*.activity_at' => ['nullable', 'date'],
-            'features.*.requirements.*.completed_at' => ['nullable', 'date'],
             'features.*.requirements.*.is_draft' => ['sometimes', 'boolean'],
             'features.*.requirements.*.source' => ['nullable', 'string'],
             'features.*.requirements.*.reference' => ['nullable'],
@@ -203,14 +200,14 @@ class Project extends Model
                     'weight' => $actor['weight'] ?? null,
                 ]));
 
-            foreach ($data['features'] as $feature_index => $feature_data) {
+            foreach ($data['features'] as $feature_data) {
                 $feature_model = $project->features()->create([
                     'name' => $feature_data['name'],
                     'description' => $feature_data['description'] ?? null,
                     'weight' => $feature_data['weight'] ?? null,
                 ]);
 
-                foreach ($feature_data['requirements'] as $requirement_index => $requirement_data) {
+                foreach ($feature_data['requirements'] as $requirement_data) {
                     $requirement_model = $feature_model->requirements()->create([
                         'name' => $requirement_data['name'] ?? null,
                         'description' => $requirement_data['description'] ?? null,
@@ -239,25 +236,6 @@ class Project extends Model
                         $requirement_model->assignments()->create([
                             'actor_id' => $actors[$actor_id]->id,
                         ]);
-                    }
-
-                    if (array_key_exists('completed_at', $requirement_data) || array_key_exists('activity_at', $requirement_data)) {
-                        $requirement_model->forceFill([
-                            'activity_at' => $requirement_data['activity_at'] ?? $requirement_model->activity_at,
-                            'completed_at' => $requirement_data['completed_at'] ?? null,
-                        ]);
-
-                        if ($requirement_model->is_draft && $requirement_model->is_complete) {
-                            throw ValidationException::withMessages([
-                                'features.' . $feature_index . '.requirements.' . $requirement_index . '.is_draft' => 'Completed requirements cannot be marked as draft.',
-                            ]);
-                        }
-
-                        $requirement_model->forceFill([
-                            'completed_at' => $requirement_model->is_blocked
-                                ? null
-                                : ($requirement_data['completed_at'] ?? null),
-                        ])->saveQuietly();
                     }
                 }
             }
