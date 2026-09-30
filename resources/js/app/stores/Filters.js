@@ -2,6 +2,7 @@ import { reactive, watch } from 'vue';
 
 export default class Filters {
     exclude_features = false;
+    hide_empty_features = false;
     features = [];
     statuses = {};
     actors = {};
@@ -24,6 +25,7 @@ export default class Filters {
         watch(filters, () => {
             if (
                 this.features.length === 0
+                && !this.hide_empty_features
                 && Object.keys(this.statuses).length === 0
                 && Object.keys(this.actors).length === 0
             ) {
@@ -83,6 +85,7 @@ export default class Filters {
         this.clearFeatures();
         this.clearStatuses();
         this.clearActors();
+        this.hide_empty_features = false;
     }
 
     get has_features() {

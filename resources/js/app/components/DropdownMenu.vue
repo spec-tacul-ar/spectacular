@@ -1,6 +1,6 @@
 <template>
-    <div ref="menu" class="relative flex print:hidden">
-        <slot name="trigger" :toggle="toggle">
+    <div ref="menu" class="relative flex print:hidden" :class="{ 'z-20': is_open }">
+        <slot name="trigger" :toggle="toggle" :is-open="is_open">
             <button type="button" class="block p-2 -mr-2" @click="toggle">
                 <IconSet name="mini-menu" />
             </button>

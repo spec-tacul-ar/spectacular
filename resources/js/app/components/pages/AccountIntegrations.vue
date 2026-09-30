@@ -12,6 +12,16 @@
 
         <h1 class="font-display font-semibold text-4xl text-center mb-4 mx-6">Integrations</h1>
 
+        <Card class="p-6 mb-6 border-2 border-gray-800 dark:border-gray-400">
+            <h2 class="font-display text-2xl mb-2">Connect an AI coding agent</h2>
+
+            <p class="mb-4">Use the URL below to connect Spectacular to your AI coding agent via <a href="https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-remote-servers" class="link">MCP</a>. You will be prompted to authenticate before access is granted.</p>
+
+            <div class="border border-gray-200 p-4 dark:border-gray-800 dark:bg-gray-900">
+                <code class="font-mono break-all text-sm">{{ mcp_endpoint }}</code>
+            </div>
+        </Card>
+
         <Card class="p-6">
             <h2 class="font-display text-2xl mb-4">Access tokens</h2>
 
@@ -49,6 +59,9 @@ export default {
         TokenItem,
     },
     computed: {
+        mcp_endpoint() {
+            return window.location.origin + '/mcp/specifications';
+        },
         tokens() {
             return Token.repository().collection.sortBy(token => token.name.toLocaleLowerCase());
         },

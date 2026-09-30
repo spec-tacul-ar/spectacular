@@ -1,522 +1,280 @@
 {
-    "name": "Example Project",
-    "description": "<p>This is the sample project to demonstrate what a specification can look like. It roughly describes the features of Spectacular itself.</p>",
+    "name": "Lucia's Restaurant",
+    "description": "<p><em>Lucia’s</em> is an independent Italian restaurant located in a small market town in England. The restaurant serves a range of traditional Italian dishes and provides a friendly, personal dining experience for local customers and visitors. At present, members of the waiting staff take orders manually and pass them to the kitchen. <em>Lucia’s</em> is now looking to digitise this process by introducing an electronic ordering system. The new system would allow staff to enter customers’ orders using a tablet or terminal and send them directly to the kitchen, helping to reduce mistakes, improve communication and make service more efficient.</p><hr><p>This project was featured in this <a href=\"https://www.youtube.com/watch?v=jUzVuem6SwA\">how-to video</a>.</p>",
+    "locale": "en",
     "actors": [
         {
             "id": 1,
-            "name": "Project Managers",
-            "summary": "These are team members responsible for communicate with both clients and developers.",
+            "name": "Managers",
+            "summary": "A manager oversees the daily operation of a restaurant and makes sure everything runs smoothly. In the context of this system, they manage operations in both the dining room and the kitchen.",
             "weight": 0
         },
         {
             "id": 2,
-            "name": "Developers",
-            "summary": "These are team members responsible for building the project.",
+            "name": "Chefs",
+            "summary": "The senior kitchen staff. They receive orders and have them prepared. They are also responsible for monitoring stock levels.",
             "weight": 1
         },
         {
             "id": 3,
-            "name": "AI coding agents",
-            "summary": "LLM-based tools such as Claude, Codex and Cursor.",
+            "name": "Waiters",
+            "summary": "The waiting staff are responsible for taking orders and serving food. They are able to advise guests on the availability of certain dishes and the ingredients used.",
             "weight": 2
         }
     ],
     "features": [
         {
-            "name": "Projects",
-            "description": "<p>A project encompasses the entire system that is to be created and maintained. </p>",
+            "id": 1,
+            "name": "User",
+            "description": "<p>This section is concerned with the basics of user authentication and authorisation. </p>",
             "weight": 0,
             "requirements": [
                 {
-                    "name": "create new projects",
-                    "description": "<p>A wizard will be presented to help the user scaffold their specification. They will be asked for a name, the users and features.</p><p>When AI features are added, a simple description field will be presented and this can be used to scaffold the specification automatically.</p>",
+                    "id": 1,
+                    "name": "create new users",
+                    "description": "<p>A user consists of a name and a role. A four-digit numeric passcode is automatically generated for each user. This is only presented once at account creation.</p>",
                     "blocked_reason": null,
+                    "is_draft": false,
                     "source": null,
                     "reference": 1,
                     "weight": 0,
-                    "tasks": [
-                        {
-                            "name": "Present a wizard to the user",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Add a plain text description when AI is enabled.",
-                            "is_complete": false,
-                            "weight": 1
-                        }
-                    ],
+                    "tasks": [],
                     "unknowns": [],
                     "actor_ids": [
                         1
                     ]
                 },
                 {
-                    "name": "view a project",
-                    "description": "<p>The project should be laid out like a document, allowing all items to be scrolled to. The browser's Find On Page feature will allow the entire document to be searchable too.</p><p>An outline of the project should appear on the side to facilitate easy navigation of the document. It should show requirements grouped by feature and indicate the statuses of those requirements.</p>",
+                    "id": 2,
+                    "name": "sign in",
+                    "description": "<p>Since there are only a handful of staff, the login screen is presented as a dropdown of names sorted alphabetically.</p><p>The user must also provide their passcode.</p>",
                     "blocked_reason": null,
+                    "is_draft": false,
                     "source": null,
-                    "reference": 20,
-                    "weight": null,
-                    "tasks": [
-                        {
-                            "name": "Show the project",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Show an outline of the specification",
-                            "is_complete": true,
-                            "weight": 1
-                        },
-                        {
-                            "name": "In the outline, highly the sections currently in the browser viewport",
-                            "is_complete": false,
-                            "weight": 2
-                        }
-                    ],
+                    "reference": 3,
+                    "weight": 1,
+                    "tasks": [],
                     "unknowns": [],
                     "actor_ids": [
                         1,
-                        2
+                        2,
+                        3
                     ]
                 },
                 {
-                    "name": "edit projects",
-                    "description": "<p>Both the project title and its description can be edited.</p><p>The description field, though optional, will allow rich-text formatting.</p>",
+                    "id": 3,
+                    "name": "remove users",
+                    "description": "<p>Users can be removed individually. The user must confirm their wish to remove a user.</p>",
                     "blocked_reason": null,
+                    "is_draft": false,
                     "source": null,
                     "reference": 2,
-                    "weight": 1,
-                    "tasks": [
-                        {
-                            "name": "Create a form for editing projects",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Integrate a rich-text editor for formatting text.",
-                            "is_complete": true,
-                            "weight": 1
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "delete projects",
-                    "description": "<p>Deleting a project is non-reversible so the user must confirm their choice in a modal.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 3,
                     "weight": 2,
-                    "tasks": [
-                        {
-                            "name": "Show a confirmation modal with checkbox",
-                            "is_complete": true,
-                            "weight": 0
-                        }
-                    ],
+                    "tasks": [],
                     "unknowns": [],
                     "actor_ids": [
                         1
                     ]
                 },
                 {
-                    "name": "reorganise projects",
-                    "description": "<p>The user may change the order of users and features. Within each feature, they should be able to change the order of requirements.</p><p>Furthermore, requirements can be moved to other features using this interface.</p>",
+                    "id": 4,
+                    "name": "sign out",
+                    "description": "<p>A button to sign out will be available on every screen.</p>",
                     "blocked_reason": null,
+                    "is_draft": false,
                     "source": null,
                     "reference": 4,
                     "weight": 3,
-                    "tasks": [
-                        {
-                            "name": "Allow users and features to be sortable",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Allow requirements to be sorted and moved to other features",
-                            "is_complete": true,
-                            "weight": 1
-                        },
-                        {
-                            "name": "Remove SortableJS because it's so heavy",
-                            "is_complete": false,
-                            "weight": 2
-                        }
-                    ],
-                    "unknowns": [
-                        {
-                            "name": "Can we achieve the same UX without a third-party library?"
-                        }
-                    ],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "export projects",
-                    "description": "<p>Initially, there will be HTML, Markdown and JSON exports.</p><p>The HTML export will use a basic stylesheet to improve its appearance. It <strong>must</strong> remove malicious scripts and other bad things.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 5,
-                    "weight": 4,
-                    "tasks": [
-                        {
-                            "name": "Add HTML export",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Add Markdown export",
-                            "is_complete": true,
-                            "weight": 1
-                        },
-                        {
-                            "name": "Add JSON export",
-                            "is_complete": true,
-                            "weight": 2
-                        }
-                    ],
-                    "unknowns": [
-                        {
-                            "name": "Which other formats will people want?"
-                        },
-                        {
-                            "name": "How might we facilitate customising the HTML styles?"
-                        }
-                    ],
+                    "tasks": [],
+                    "unknowns": [],
                     "actor_ids": [
                         1,
-                        2
+                        2,
+                        3
                     ]
-                },
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Orders",
+            "description": "<p>This is the centre of the app's functionality - taking customers' orders.</p>",
+            "weight": 1,
+            "requirements": [
                 {
-                    "name": "view requirements as markdown",
-                    "description": "<p>Some developers might like to feed the specification to an LLM-powered coding agent.</p><p>This can be achieved by using the Markdown export link.</p>",
+                    "id": 1,
+                    "name": "take orders",
+                    "description": "<p>The waiter will use plus and minus buttons next to each menu item to specify quantities. A table number must be provided each time.</p><p>When ready, the waiter confirms the selection.</p><p>A dish cannot be added to an order if one of its ingredients is out of stock.</p>",
                     "blocked_reason": null,
+                    "is_draft": false,
                     "source": null,
-                    "reference": 7,
-                    "weight": 6,
+                    "reference": 5,
+                    "weight": 0,
                     "tasks": [],
-                    "unknowns": [
-                        {
-                            "name": "Will users realise they can use the export link in this way?"
-                        }
-                    ],
+                    "unknowns": [],
                     "actor_ids": [
                         3
                     ]
                 },
                 {
-                    "name": "print the project",
-                    "description": "<p>The printing should be achieved via print styles so the user merely has to click print in their browser.</p>",
+                    "id": 2,
+                    "name": "see a list of pending orders",
+                    "description": "<p>This is a live list of orders as they come in. New orders are appended to this list.</p>",
                     "blocked_reason": null,
+                    "is_draft": false,
                     "source": null,
-                    "reference": 8,
-                    "weight": 7,
-                    "tasks": [
-                        {
-                            "name": "Use print styles to hide UI elements",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Change the print font size to allow more requirements per page",
-                            "is_complete": false,
-                            "weight": 1
-                        },
-                        {
-                            "name": "Force subtle background colours for improved clarity",
-                            "is_complete": false,
-                            "weight": 2
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "filter requirements",
-                    "description": "<p>Filters will be provided to limit visible requirements to those matching certain statuses, users and/or features.</p><p>An indicator should be shown so the user knows filters are being applied.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 9,
-                    "weight": 8,
-                    "tasks": [
-                        {
-                            "name": "Add include and exclude filters for statuses.",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Add include and exclude filters for users.",
-                            "is_complete": true,
-                            "weight": 1
-                        },
-                        {
-                            "name": "Allow features to be included or excluded",
-                            "is_complete": true,
-                            "weight": 2
-                        }
-                    ],
-                    "unknowns": [
-                        {
-                            "name": "Do we need to better explain how the filter modes work?"
-                        },
-                        {
-                            "name": "Do we need a \"Clear All\" button too?"
-                        }
-                    ],
-                    "actor_ids": [
-                        1,
-                        2
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Features",
-            "description": "<p>Features encapsulate related requirements. Some call these <em>Epics</em>.</p>",
-            "weight": 1,
-            "requirements": [
-                {
-                    "name": "create new features",
-                    "description": "<p>A new feature simply needs a name and an optional rich-text description field.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 10,
-                    "weight": 0,
-                    "tasks": [
-                        {
-                            "name": "Build a form for creating features",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Reuse the rich-text field",
-                            "is_complete": true,
-                            "weight": 1
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "edit existing features",
-                    "description": "<p>Both the title and description are editable.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 11,
+                    "reference": 6,
                     "weight": 1,
-                    "tasks": [
-                        {
-                            "name": "Reuse the creation form",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Show an outline around the active feature",
-                            "is_complete": true,
-                            "weight": 1
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "delete features",
-                    "description": "<p>The system will not allow features to be deleted if they contain requirements.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 12,
-                    "weight": 2,
-                    "tasks": [
-                        {
-                            "name": "Show modal when the feature contains requirements",
-                            "is_complete": true,
-                            "weight": 0
-                        }
-                    ],
-                    "unknowns": [
-                        {
-                            "name": "Instead of requiring users to delete all requirements under the feature, do we give them the option to move them?"
-                        }
-                    ],
-                    "actor_ids": [
-                        1
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Requirements",
-            "description": "<p>Requirements describe actions users perform to achieve a task. Some may refer to these as user stories.</p>",
-            "weight": 2,
-            "requirements": [
-                {
-                    "name": "create new requirements",
-                    "description": "<p>While a user doesn't have to select the user types that apply to the requirement, they must still give it a name. If they do no select any users, the name defaults to \"Users can...\"</p><p>Next, they can optionally provide a rich-text description for elaboration and a source to trace where requirements have come from (such as other documents, meetings, etc.)</p><p>If a requirement is blocked, the user can mark it as such by giving it a reason.</p><p>A \"Quick Add\" button should be available at all times where the user can create a requirement and specify the feature it belongs to, instead of using a button within the feature itself.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 13,
-                    "weight": 0,
-                    "tasks": [
-                        {
-                            "name": "Create the requirement creation form",
-                            "is_complete": true,
-                            "weight": 0
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "edit requirements",
-                    "description": "<p>All the same fields that are present when creating a requirement are available on the edit form. </p><p>A user may need to refer to other parts of the project while editing a requirement. A button shall be provided that returns them to the active requirement.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 14,
-                    "weight": 1,
-                    "tasks": [
-                        {
-                            "name": "Reuse the create form for editing",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Find a better icon for the scroll to requirement button",
-                            "is_complete": false,
-                            "weight": 1
-                        },
-                        {
-                            "name": "Show an outline around the active requirement",
-                            "is_complete": true,
-                            "weight": 2
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "delete requirements",
-                    "description": "<p>Deleting a requirement means deleting its tasks and unknowns too. The user will have to confirm this action.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 15,
-                    "weight": 2,
-                    "tasks": [
-                        {
-                            "name": "Create a confirmation modal to prevent accidents",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Close the side panel if it's open on the requirement that was just deleted",
-                            "is_complete": false,
-                            "weight": 1
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1
-                    ]
-                },
-                {
-                    "name": "mark tasks as complete",
-                    "description": "<p>Tasks can be marked complete or incomplete individually.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 17,
-                    "weight": 4,
-                    "tasks": [
-                        {
-                            "name": "Add the action to the task mini-menu",
-                            "is_complete": true,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Add the Mark All action to the requirement",
-                            "is_complete": true,
-                            "weight": 1
-                        }
-                    ],
-                    "unknowns": [],
-                    "actor_ids": [
-                        1,
-                        2
-                    ]
-                },
-                {
-                    "name": "manage unknowns on requirements",
-                    "description": "<p>Should a user be unsure of something with a requirement, they may raise an Unknown. This may be during the scoping phase or discovered during development.</p><p>On resolving an unknown, the user is given the option to append clarifying text to the end of the requirement's description.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 18,
-                    "weight": 5,
-                    "tasks": [
-                        {
-                            "name": "Wrap the appended text in paragraph text.",
-                            "is_complete": false,
-                            "weight": 0
-                        }
-                    ],
-                    "unknowns": [
-                        {
-                            "name": "Do unknowns need to be sortable? Probably not."
-                        }
-                    ],
-                    "actor_ids": [
-                        1,
-                        2
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Settings",
-            "description": null,
-            "weight": 3,
-            "requirements": [
-                {
-                    "name": "switch to and from dark mode",
-                    "description": "<p>The default should be <em>Auto</em> - the system-wide setting. The user has the option to switch between this, light and dark mode.</p>",
-                    "blocked_reason": null,
-                    "source": null,
-                    "reference": 19,
-                    "weight": 0,
-                    "tasks": [
-                        {
-                            "name": "Create a widget for changing the theme",
-                            "is_complete": false,
-                            "weight": 0
-                        },
-                        {
-                            "name": "Create a dark theme",
-                            "is_complete": false,
-                            "weight": 1
-                        },
-                        {
-                            "name": "Implement a switching mode including sensing system setting",
-                            "is_complete": false,
-                            "weight": 2
-                        }
-                    ],
+                    "tasks": [],
                     "unknowns": [],
                     "actor_ids": [
                         2,
+                        3
+                    ]
+                },
+                {
+                    "id": 3,
+                    "name": "mark orders as complete",
+                    "description": "<p>When an order is ready to be served, the chef clicks a button to mark it as complete and it is removed from the list.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 7,
+                    "weight": 2,
+                    "tasks": [],
+                    "unknowns": [],
+                    "actor_ids": [
+                        2
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "cancel orders",
+                    "description": "<p>The user must confirm this action before the order is cancelled.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 8,
+                    "weight": 3,
+                    "tasks": [],
+                    "unknowns": [],
+                    "actor_ids": [
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Stock",
+            "description": "<p>This feature is concerned with a rudimentary live stock control system.</p>",
+            "weight": 2,
+            "requirements": [
+                {
+                    "id": 1,
+                    "name": "see a list of ingredients",
+                    "description": "<p>Ingredients are listed alphabetically with those out of stock grouped at the bottom.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 9,
+                    "weight": 0,
+                    "tasks": [],
+                    "unknowns": [],
+                    "actor_ids": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "id": 2,
+                    "name": "add new ingredients to the system",
+                    "description": "<p>Ingredients can only be added to the system (not removed). Legacy ingredients are preserved for future use, whether they were used in a dish or not.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 10,
+                    "weight": 1,
+                    "tasks": [],
+                    "unknowns": [],
+                    "actor_ids": [
+                        1
+                    ]
+                },
+                {
+                    "id": 3,
+                    "name": "mark ingredients as out of stock",
+                    "description": "<p>With a click of a button, chefs will be able to mark an ingredient as being low in stock thus making associated dishes unavailable.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 11,
+                    "weight": 2,
+                    "tasks": [],
+                    "unknowns": [],
+                    "actor_ids": [
+                        2
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "mark ingredients as back in stock",
+                    "description": "<p>When deliveries arrive, managers will be able to mark ingredients as available again.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 12,
+                    "weight": 3,
+                    "tasks": [],
+                    "unknowns": [],
+                    "actor_ids": [
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Menu",
+            "description": "<p>Lucia's has a modest menu grouped into four categories: Drinks, Starters, Mains and Dessert.</p>",
+            "weight": 3,
+            "requirements": [
+                {
+                    "id": 1,
+                    "name": "view the menu",
+                    "description": "<p>Dishes are grouped by category in the order given above. Within each group, the dishes are listed alphabetically.</p><p>Each dish list its ingredients too. If the dish is unavailable due to the lack of an ingredient, it should be marked as such. Highlight the missing ingredient in red text.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 13,
+                    "weight": null,
+                    "tasks": [
+                        {
+                            "id": 1,
+                            "name": "Create a seeder that creates a modest menu automatically.",
+                            "is_complete": false,
+                            "weight": 0
+                        }
+                    ],
+                    "unknowns": [],
+                    "actor_ids": [
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                {
+                    "id": 2,
+                    "name": "update the menu",
+                    "description": "<p>Managers can create, update and delete items on the menu. A menu item has a name, description and associated ingredients.</p><p>Once a dish has been used in an order, it cannot be updated any more.</p><p>Removing dishes from the system will soft delete them to preserve order history. Dishes cannot be deleted while attached to pending orders.</p>",
+                    "blocked_reason": null,
+                    "is_draft": false,
+                    "source": null,
+                    "reference": 14,
+                    "weight": null,
+                    "tasks": [],
+                    "unknowns": [],
+                    "actor_ids": [
                         1
                     ]
                 }

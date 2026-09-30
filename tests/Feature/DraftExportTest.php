@@ -23,8 +23,8 @@ class DraftExportTest extends TestCase
             $response = $this->getJson('/exports/' . $fixture['project']->sqid . '/json')
                 ->assertOk()
                 ->assertJsonPath('features.0.requirements.0.is_draft', $isDraft)
-                ->assertJsonPath('features.0.requirements.0.activity_at', $fixture['requirement']->activity_at->toJSON())
-                ->assertJsonPath('features.0.requirements.0.completed_at', null);
+                ->assertJsonMissingPath('features.0.requirements.0.activity_at')
+                ->assertJsonMissingPath('features.0.requirements.0.completed_at');
 
             $imported = Project::import($response->json());
             $this->assertSame($isDraft, $imported->features->first()->requirements->first()->is_draft);
@@ -101,7 +101,7 @@ class DraftExportTest extends TestCase
             ->assertOk()->assertSee('<span class="status status-blocked">Blocked</span>', false);
     }
 
-    public function test_exports_round_trip_completion_and_stale_draft_timestamps(): void
+    public function test_json_exports_do_not_include_completion_timestamps(): void
     {
         $this->travelTo('2026-08-18 10:00:00');
         $fixture = $this->createProjectFixture();
@@ -110,19 +110,14 @@ class DraftExportTest extends TestCase
         $this->travelTo('2026-08-18 10:01:00');
         $fixture['requirement']->complete();
 
-        foreach ([false, true] as $is_draft) {
-            if ($is_draft) {
-                $this->travelTo('2026-08-18 10:02:00');
-                $fixture['requirement']->update(['is_draft' => true]);
-            }
+        $data = $this->getJson('/exports/' . $fixture['project']->sqid . '/json')
+            ->assertOk()
+            ->assertJsonMissingPath('features.0.requirements.0.completed_at')
+            ->json();
+        $imported = Project::import($data)->requirements()->firstOrFail();
 
-            $data = $this->getJson('/exports/' . $fixture['project']->sqid . '/json')->assertOk()->json();
-            $imported = Project::import($data)->requirements()->firstOrFail();
-            $this->assertSame($is_draft, $imported->is_draft);
-            $this->assertSame(!$is_draft, $imported->is_complete);
-            $this->assertSame($fixture['requirement']->completed_at->toJSON(), $imported->completed_at->toJSON());
-            $this->assertSame($fixture['requirement']->activity_at->toJSON(), $imported->activity_at->toJSON());
-        }
+        $this->assertFalse($imported->is_complete);
+        $this->assertNull($imported->completed_at);
 
         $this->travelBack();
     }

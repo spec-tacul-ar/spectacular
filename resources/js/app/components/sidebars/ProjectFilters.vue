@@ -1,5 +1,18 @@
 <template>
     <div class="mt-4">
+        <div class="border-b border-gray-200 mx-4 pb-4 mb-4 dark:border-gray-800">
+            <div class="flex items-center justify-between py-2">
+                <label class="flex items-center gap-2">
+                    <input v-model="filters.hide_empty_features" type="checkbox">
+                    Hide empty
+                </label>
+
+                <InfoPopover small>
+                    <p>Hide any features that have no visible requirements because of filtering.</p>
+                </InfoPopover>
+            </div>
+        </div>
+
         <div>
             <div class="flex items-center gap-2 mx-4 mb-2">
                 <h4 class="uppercase font-semibold mr-auto">Statuses</h4>
@@ -117,17 +130,20 @@
                 </button>
             </div>
         </div>
+
     </div>
 </template>
 
 <script>
 import FilterSwitch from '@/components/FilterSwitch.vue';
 import IconSet from '@/components/IconSet.vue';
+import InfoPopover from '@/components/InfoPopover.vue';
 
 export default {
     components: {
         FilterSwitch,
         IconSet,
+        InfoPopover,
     },
     computed: {
         filters() {
