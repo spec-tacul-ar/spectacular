@@ -15,9 +15,9 @@
             </Tooltip>
         </template>
 
-        <DropdownMenuItem :href="'/exports/' + project.id + '/html'" icon="html-file" download :filename="project.slug + '.spectacular.html'">HTML</DropdownMenuItem>
-        <DropdownMenuItem :href="'/exports/' + project.id + '/markdown'" icon="markdown-file" download :filename="project.slug + '.spectacular.md'">Markdown</DropdownMenuItem>
-        <DropdownMenuItem :href="'/exports/' + project.id + '/json'" icon="json-file" download :filename="project.slug + '.spectacular.json'">JSON</DropdownMenuItem>
+        <DropdownMenuItem :href="'/exports/' + project.id + '/html'" icon="html-file" :download="project.slug + '-' + new Date().toLocaleDateString() + '.spectacular.html'">HTML</DropdownMenuItem>
+        <DropdownMenuItem :href="'/exports/' + project.id + '/markdown'" icon="markdown-file" :download="project.slug + '-' + new Date().toLocaleDateString() + '.spectacular.md'">Markdown</DropdownMenuItem>
+        <DropdownMenuItem :href="'/exports/' + project.id + '/json'" icon="json-file" :download="project.slug + '-' + new Date().toLocaleDateString() + '.spectacular.json'">JSON</DropdownMenuItem>
     </DropdownMenu>
 
     <slot name="after" />
