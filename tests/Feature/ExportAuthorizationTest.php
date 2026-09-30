@@ -55,8 +55,8 @@ class ExportAuthorizationTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('name', $fixture['project']->name);
         $response->assertJsonPath('locale', $fixture['project']->locale);
-        $response->assertJsonPath('features.0.requirements.0.completed_at', $fixture['requirement']->completed_at->toJSON());
-        $response->assertJsonPath('features.0.requirements.0.activity_at', $fixture['requirement']->activity_at->toJSON());
+        $response->assertJsonMissingPath('features.0.requirements.0.completed_at');
+        $response->assertJsonMissingPath('features.0.requirements.0.activity_at');
 
         $this->get('/exports/' . $fixture['project']->sqid . '/html')
             ->assertOk()
