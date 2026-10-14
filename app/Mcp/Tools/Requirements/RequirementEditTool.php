@@ -66,11 +66,19 @@ class RequirementEditTool extends Tool
             $data['description'] = Str::markdown($data['description'], ['html_input' => 'strip', 'allow_unsafe_links' => false]);
             Validator::make($data, ['description' => ['max:10000']])->validate();
         }
-        if (!empty($data['is_draft']) && $requirement->is_complete) {
-            throw ValidationException::withMessages(['data.is_draft' => 'Completed requirements cannot be marked as draft.']);
-        }
+        $requirement = DB::transaction(function () use ($request, $requirement, $data) {
+            $requirement = $requirement->newQuery()->lockForUpdate()->find($requirement->id);
+            if (!$requirement || !$request->user()->can('update', $requirement)) {
+                throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
+            }
+            if (!empty($data['is_draft']) && $requirement->is_complete) {
+                throw ValidationException::withMessages(['data.is_draft' => 'Completed requirements cannot be marked as draft.']);
+            }
 
-        DB::transaction(fn() => $requirement->update($data));
+            $requirement->update($data);
+
+            return $requirement;
+        });
         $requirement->refresh();
 
         $result = $requirement->obfuscateIdentifiers($requirement->attributesToArray());

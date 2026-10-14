@@ -50,14 +50,26 @@ class UnknownResolveTool extends Tool
         if (!$request->user()->can('update', $unknown)) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
-        $requirement = $unknown->requirement;
         $html = Str::markdown($validated['clarification'], ['html_input' => 'strip', 'allow_unsafe_links' => false]);
-        $description = ($requirement->description ?? '') . $html;
-        Validator::make(['description' => $description], ['description' => ['max:10000']])->validate();
 
-        DB::transaction(function () use ($requirement, $unknown, $description) {
+        [$requirement, $unknown] = DB::transaction(function () use ($request, $unknown, $html) {
+            // Lock the parent first, then recheck the question: it may have moved or
+            // been removed while this request was waiting for another writer.
+            $requirement = $unknown->requirement()->lockForUpdate()->first();
+            $unknown = $requirement?->unknowns()->lockForUpdate()->find($unknown->id);
+
+            if (!$unknown || !$request->user()->can('update', $requirement)) {
+                throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
+            }
+
+            $unknown->setRelation('requirement', $requirement);
+            $description = ($requirement->description ?? '') . $html;
+            Validator::make(['description' => $description], ['description' => ['max:10000']])->validate();
+
             $requirement->update(['description' => $description]);
             $unknown->delete();
+
+            return [$requirement, $unknown];
         });
 
         $requirement->refresh();

@@ -21,7 +21,7 @@ trait TracksActivity
             ])->saveQuietly();
         });
 
-        if ($this->wasChanged('activity_at')) {
+        if (!$this->trashed() && $this->wasChanged('activity_at')) {
             broadcast(new ProjectItemSaved($this))->toOthers();
         }
 

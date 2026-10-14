@@ -138,6 +138,7 @@ trait Revisionable
         }
 
         $this->attributes['history'] = $this->newQuery()
+            ->withTrashed()
             ->withHistory()
             ->whereKey($this->getKey())
             ->toBase()

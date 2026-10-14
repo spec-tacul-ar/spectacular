@@ -5,6 +5,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const workspace = path.resolve(import.meta.dirname, '../..');
 const temporary = await mkdtemp(path.join(tmpdir(), 'spectacular-live-updates-'));
@@ -101,6 +103,33 @@ try {
         Model.repository('tasks').delete('task');
         Model.repository('unknowns').delete('unknown');
         assert.equal(Model.repository('projects').find('project').features.count(), 0);
+    });
+
+    await test('real MCP deletion events keep empty items and cascades removed', async () => {
+        const fixture = path.join(temporary, 'deletion-events.json');
+        await promisify(execFile)('php', [
+            'vendor/bin/phpunit', '--filter', 'test_deletion_event_streams_do_not_reinsert_empty_items_or_cascades',
+            'tests/Feature/Mcp/SpecificationWriteSafetyTest.php',
+        ], { cwd: workspace, env: { ...process.env, SPECTACULAR_EVENT_FIXTURE: fixture } });
+        const streams = JSON.parse(await readFile(fixture, 'utf8'));
+        assert.equal(streams.length, 4);
+        for (const { initial, messages } of streams) {
+            Model.resetRepositories();
+            for (const [repository, items] of Object.entries(initial)) {
+                Model.repository(repository).saveMany(items);
+            }
+            for (const message of messages) {
+                if (message.event === 'ProjectItemDeleted') {
+                    Model.repository(message.repository).delete(message.id);
+                } else {
+                    Model.repository(message.repository).save(message.data);
+                }
+            }
+            for (const message of messages.filter(item => item.event === 'ProjectItemDeleted')) {
+                assert.equal(Model.repository(message.repository).find(message.id), undefined);
+            }
+            assert.ok(Model.repository('projects').find(initial.projects[0].id));
+        }
     });
 } finally {
     await rm(temporary, { recursive: true, force: true });

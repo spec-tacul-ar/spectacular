@@ -4,6 +4,7 @@ namespace App\Actions\Requirements;
 
 use Illuminate\Auth\Access\Response as GateResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Router;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\ActionRequest;
@@ -80,57 +81,62 @@ class EditRequirement
 
     public function handle(Requirement $requirement, array $validated): Requirement
     {
-        if (!empty($validated['is_draft']) && !$requirement->is_draft && $requirement->is_complete) {
-            throw ValidationException::withMessages([
-                'is_draft' => 'Completed requirements cannot be marked as draft.',
-            ]);
-        }
+        return DB::transaction(function () use ($requirement, $validated) {
+            $requirement = $requirement->newQuery()->lockForUpdate()->findOrFail($requirement->id);
+            Gate::authorize('update', $requirement);
 
-        $requirement->update($validated);
-
-        if (array_key_exists('actor_ids', $validated)) {
-            $requirement->assignments->whereNotIn('actor_id', $validated['actor_ids'])->each->delete();
-
-            foreach ($validated['actor_ids'] as $actorId) {
-                $requirement->assignments()->updateOrCreate(['actor_id' => $actorId]);
+            if (!empty($validated['is_draft']) && !$requirement->is_draft && $requirement->is_complete) {
+                throw ValidationException::withMessages([
+                    'is_draft' => 'Completed requirements cannot be marked as draft.',
+                ]);
             }
 
-            $requirement->load('assignments');
-        }
+            $requirement->update($validated);
 
-        if (array_key_exists('unknowns', $validated)) {
-            $remainingKeys = array_column($validated['unknowns'], 'id');
+            if (array_key_exists('actor_ids', $validated)) {
+                $requirement->assignments->whereNotIn('actor_id', $validated['actor_ids'])->each->delete();
 
-            $requirement->unknowns->except($remainingKeys)->each->delete();
+                foreach ($validated['actor_ids'] as $actorId) {
+                    $requirement->assignments()->updateOrCreate(['actor_id' => $actorId]);
+                }
 
-            foreach ($validated['unknowns'] as $unknown) {
-                $requirement->unknowns()->updateOrCreate(
-                    ['id' => $unknown['id'] ?? null],
-                    $unknown,
-                );
+                $requirement->load('assignments');
             }
 
-            $requirement->load('unknowns');
-        }
+            if (array_key_exists('unknowns', $validated)) {
+                $remainingKeys = array_column($validated['unknowns'], 'id');
 
-        if (array_key_exists('tasks', $validated)) {
-            $remainingKeys = array_column($validated['tasks'], 'id');
+                $requirement->unknowns->except($remainingKeys)->each->delete();
 
-            if ($remainingKeys) {
-                $requirement->tasks->except($remainingKeys)->each->delete();
+                foreach ($validated['unknowns'] as $unknown) {
+                    $requirement->unknowns()->updateOrCreate(
+                        ['id' => $unknown['id'] ?? null],
+                        $unknown,
+                    );
+                }
+
+                $requirement->load('unknowns');
             }
 
-            foreach ($validated['tasks'] as $task) {
-                $requirement->tasks()->updateOrCreate(
-                    ['id' => $task['id'] ?? null],
-                    $task,
-                );
+            if (array_key_exists('tasks', $validated)) {
+                $remainingKeys = array_column($validated['tasks'], 'id');
+
+                if ($remainingKeys) {
+                    $requirement->tasks->except($remainingKeys)->each->delete();
+                }
+
+                foreach ($validated['tasks'] as $task) {
+                    $requirement->tasks()->updateOrCreate(
+                        ['id' => $task['id'] ?? null],
+                        $task,
+                    );
+                }
+
+                $requirement->load('tasks');
             }
 
-            $requirement->load('tasks');
-        }
-
-        return $requirement;
+            return $requirement;
+        });
     }
 
     public function asController(ActionRequest $request, Requirement $requirement): RequirementResource

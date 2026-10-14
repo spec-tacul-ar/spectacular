@@ -32,7 +32,7 @@ class ProjectItemSaved implements ShouldBroadcast, ShouldDispatchAfterCommit, Sh
         $this->repository = (string) str($model::class)->classBasename()->plural()->lower();
 
         $this->item_id = $model->sqid;
-        
+
         $this->payload = [
             'repository' => $this->repository,
             'data' => $model->withoutRelations()->toResource()->resolve(), // Related items have their own events. Exclude loaded relationships so a stale parent update cannot reinsert a deleted child.
