@@ -6,7 +6,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "lint": "eslint resources/js --max-warnings=0"
+        "lint": "eslint resources/js --max-warnings=0",
+        "test:live-updates": "node --test tests/Frontend/LiveProjectUpdatesTest.mjs"
     },
     "devDependencies": {
         "@laravel/echo-vue": "^2.4.0",

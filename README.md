@@ -8,7 +8,7 @@ Spectacular is a free open-source specification workspace for AI-assisted softwa
 
 Spectacular gives coding agents the structured product context they need before they touch the code. Instead of asking AI to infer intent from tickets, chats, and stale documents, Spectacular keeps the functional specification as a living source of truth that is clear for humans and directly available to AI tools.
 
-The built-in MCP server lets agents such as Codex, Cursor, and Claude read your specifications, inspect project changes, and pull only the context they need while they work.
+The built-in MCP server lets agents such as Codex, Cursor, and Claude read and author your specifications, inspect project changes, and pull only the context they need while they work. Specification writes preserve revision history and cannot modify comments or feedback.
 
 [LIVE DEMO](https://spec.tacul.ar)
 
@@ -76,7 +76,7 @@ To enable it, configure a Laravel broadcasting driver and a queue worker for you
 
 ## MCP for AI Agents
 
-Connect AI coding agents to Spectacular's MCP server so they can read the latest specification while they work.
+Connect AI coding agents to Spectacular's MCP server so they can read the latest specification while they work and author changes when you ask. Owners and editors can create, edit, move, reorder and soft-delete specification items, resolve unknowns and track completion. Comments, feedback and historical revisions are not writable through MCP.
 
 Cloud endpoint:
 

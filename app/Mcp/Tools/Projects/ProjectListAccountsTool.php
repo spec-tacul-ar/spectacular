@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mcp\Tools;
+namespace App\Mcp\Tools\Projects;
 
 use App\Models\Project;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -13,9 +13,9 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('ListProjectAccountsTool')]
+#[Name('ProjectListAccountsTool')]
 #[Description('Returns the names and IDs of accounts associated with a specification. Use it only when you need to attribute account_id values in item history to collaborators.')]
-class ListProjectAccountsTool extends Tool
+class ProjectListAccountsTool extends Tool
 {
     /**
      * Handle the tool request.
@@ -56,7 +56,7 @@ class ListProjectAccountsTool extends Tool
     {
         return [
             'id' => $schema->string()
-                ->description('The specification ID returned by ListProjectsTool or GetProjectTool.')
+                ->description('The specification ID returned by ProjectListTool or ProjectGetTool.')
                 ->required(),
         ];
     }

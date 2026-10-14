@@ -25,6 +25,7 @@ export default class Feature extends Model {
         this.constructor.repository('requirements').saveMany(requirements);
     }
     onDelete() {
+        this.constructor.repository('requirements').deleteMany(this.requirements.pluck('id').all());
         const comment_ids = this.comments.pluck('id').toArray();
 
         this.constructor.repository('comments').deleteMany(comment_ids);

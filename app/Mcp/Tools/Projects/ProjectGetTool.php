@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mcp\Tools;
+namespace App\Mcp\Tools\Projects;
 
 use App\Models\Project;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -14,13 +14,13 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('GetProjectTool')]
+#[Name('ProjectGetTool')]
 #[Description(
     'Returns the complete current specification: project context, actors, features, requirements, assignments, tasks, blockers, and unknowns. '
     . 'Read it before planning or implementation. A requirement is actionable only when is_draft is false. Draft requirements and their tasks are tentative, may change, and only hint at future direction; do not work on them. '
-    . 'Surface relevant blocked_reason and unknowns instead of guessing, and retain generated_at as the checkpoint for GetChangesTool.',
+    . 'Surface relevant blocked_reason and unknowns instead of guessing, and retain generated_at as the checkpoint for ProjectGetChangesTool.',
 )]
-class GetProjectTool extends Tool
+class ProjectGetTool extends Tool
 {
     /**
      * Handle the tool request.
@@ -50,6 +50,7 @@ class GetProjectTool extends Tool
         return Response::structured([
             'id' => $project->sqid,
             'name' => $project->name,
+            'locale' => $project->locale,
             'description' => Str::htmlToMarkdown($project->description),
             'actors' => $project->actors->map(fn($actor) => [
                 'id' => $actor->sqid,
@@ -62,6 +63,7 @@ class GetProjectTool extends Tool
                 'description' => Str::htmlToMarkdown($feature->description),
                 'requirements' => $feature->requirements->map(fn($requirement) => [
                     'id' => $requirement->sqid,
+                    'name' => $requirement->name,
                     'title' => $requirement->title,
                     'description' => Str::htmlToMarkdown($requirement->description),
                     'blocked_reason' => $requirement->blocked_reason,
@@ -101,7 +103,7 @@ class GetProjectTool extends Tool
     {
         return [
             'id' => $schema->string()
-                ->description('The specification ID returned by ListProjectsTool.')
+                ->description('The specification ID returned by ProjectListTool.')
                 ->required(),
         ];
     }

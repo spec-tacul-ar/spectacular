@@ -9,27 +9,34 @@ use Illuminate\Contracts\Broadcasting\ShouldRescue;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 
 class ProjectItemDeleted implements ShouldBroadcast, ShouldDispatchAfterCommit, ShouldRescue
 {
     use Dispatchable;
-    use SerializesModels;
 
-    public function __construct(public Model $model) {}
+    protected string $project_id;
+
+    protected array $payload;
+
+    public function __construct(Model $model)
+    {
+        $project = $model instanceof Project ? $model : $model->project;
+
+        $this->project_id = $project->sqid;
+
+        $this->payload = [
+            'repository' => (string) str($model::class)->classBasename()->plural()->lower(),
+            'id' => $model->sqid,
+        ];
+    }
 
     public function broadcastOn(): array
     {
-        $project = $this->model instanceof Project ? $this->model : $this->model->project;
-
-        return [new PrivateChannel('projects.' . $project->sqid)];
+        return [new PrivateChannel('projects.' . $this->project_id)];
     }
 
     public function broadcastWith(): array
     {
-        return [
-            'repository' => str($this->model::class)->classBasename()->plural()->lower(),
-            'id' => $this->model->sqid,
-        ];
+        return $this->payload;
     }
 }

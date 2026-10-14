@@ -89,7 +89,10 @@ class Requirement extends Model
         });
 
         static::deleting(function ($requirement) {
-            $requirement->comments()->delete();
+            if (!request()->isMcp() || $requirement->isForceDeleting()) {
+                $requirement->comments()->delete();
+            }
+
             $requirement->assignments->each->delete();
             $requirement->unknowns->each->delete();
             $requirement->tasks->each->delete();

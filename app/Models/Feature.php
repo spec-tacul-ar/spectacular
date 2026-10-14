@@ -42,7 +42,10 @@ class Feature extends Model
         });
 
         static::deleting(function ($feature) {
-            $feature->comments()->delete();
+            if (!request()->isMcp() || $feature->isForceDeleting()) {
+                $feature->comments()->delete();
+            }
+
             $feature->requirements->each->delete();
         });
 

@@ -56,3 +56,6 @@ jobs:
 
       - name: Lint frontend
         run: npm run lint
+
+      - name: Test live updates
+        run: npm run test:live-updates

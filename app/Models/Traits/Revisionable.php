@@ -59,7 +59,7 @@ trait Revisionable
         $this->history->push([
             'timestamp' => now()->toISOString(),
             'account_id' => auth()->user()?->sqid,
-            'is_ai' => false,
+            'is_ai' => request()->isMcp(),
             'data' => $data,
         ]);
 
@@ -107,15 +107,15 @@ trait Revisionable
     {
         $this->loadHistory();
 
-        if ($this->created_at->isAfter($timestamp)) {
-            return $this->obfuscateIdentifiers($this->toArray());
-        }
-
         if ($this->deleted_at) {
             return [
                 'id' => $this->sqid,
                 'deleted_at' => $this->deleted_at,
             ];
+        }
+
+        if ($this->created_at->isAfter($timestamp)) {
+            return $this->obfuscateIdentifiers($this->toArray());
         }
 
         $fields = $this->history

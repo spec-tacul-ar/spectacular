@@ -11,6 +11,12 @@ export default class Project extends Model {
         this.filters = new Filters(this.id);
     }
 
+    onDelete() {
+        for (const relation of ['features', 'actors', 'comments', 'collaborations', 'invitations']) {
+            this.constructor.repository(relation).deleteMany(this[relation].pluck('id').all());
+        }
+    }
+
     get comments() {
         return this.constructor.repository('comments').collection.where('project_id', this.id);
     }

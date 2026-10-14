@@ -11,6 +11,7 @@ use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
@@ -75,6 +76,8 @@ class AppServiceProvider extends ServiceProvider
             'feature' => Feature::class,
             'requirement' => Requirement::class,
         ]);
+
+        Request::macro('isMcp', fn() => app()->bound('mcp.request'));
 
         // Don't let the HTTP Host header dictate URLs.
         URL::useOrigin(config('app.url'));

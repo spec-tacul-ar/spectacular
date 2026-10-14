@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mcp\Tools;
+namespace App\Mcp\Tools\Projects;
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
@@ -12,9 +12,9 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('ListProjectsTool')]
-#[Description('Lists the specifications available to the current account. Use it to identify the correct specification before calling GetProjectTool. IDs are opaque tool inputs; do not show them to users unless asked.')]
-class ListProjectsTool extends Tool
+#[Name('ProjectListTool')]
+#[Description('Lists the specifications available to the current account. Use it to identify the correct specification before calling ProjectGetTool. IDs are opaque tool inputs; do not show them to users unless asked.')]
+class ProjectListTool extends Tool
 {
     /**
      * Handle the tool request.

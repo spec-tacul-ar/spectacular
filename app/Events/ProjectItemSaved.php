@@ -10,35 +10,45 @@ use Illuminate\Contracts\Broadcasting\ShouldRescue;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 
 class ProjectItemSaved implements ShouldBroadcast, ShouldDispatchAfterCommit, ShouldRescue
 {
     use Dispatchable;
-    use SerializesModels;
+
+    protected string $project_id;
 
     protected string $repository;
 
-    public function __construct(public Model $model)
+    protected string $item_id;
+
+    protected array $payload;
+
+    public function __construct(Model $model)
     {
-        $this->repository = str($this->model::class)->classBasename()->plural()->lower();
+        $project = $model instanceof Project ? $model : $model->project;
+
+        $this->project_id = $project->sqid;
+
+        $this->repository = (string) str($model::class)->classBasename()->plural()->lower();
+
+        $this->item_id = $model->sqid;
+        
+        $this->payload = [
+            'repository' => $this->repository,
+            'data' => $model->withoutRelations()->toResource()->resolve(), // Related items have their own events. Exclude loaded relationships so a stale parent update cannot reinsert a deleted child.
+        ];
     }
 
     public function broadcastOn(): array
     {
-        $project = $this->model instanceof Project ? $this->model : $this->model->project;
-
         return [
-            new PrivateChannel('projects.' . $project->sqid),
-            new PresenceChannel($this->repository . '.editing.' . $this->model->sqid),
+            new PrivateChannel('projects.' . $this->project_id),
+            new PresenceChannel($this->repository . '.editing.' . $this->item_id),
         ];
     }
 
     public function broadcastWith(): array
     {
-        return [
-            'repository' => $this->repository,
-            'data' => $this->model->toResource(),
-        ];
+        return $this->payload;
     }
 }

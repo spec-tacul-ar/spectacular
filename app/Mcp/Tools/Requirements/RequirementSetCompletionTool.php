@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Mcp\Tools;
+namespace App\Mcp\Tools\Requirements;
 
 use App\Models\Requirement;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -18,12 +20,12 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
-#[Name('SetRequirementCompletionTool')]
+#[Name('RequirementSetCompletionTool')]
 #[Description(
     'Marks an unblocked requirement complete or reopens it. Call this only after checking the current requirement and only when the user-authorized work has been implemented and verified. '
     . 'Do not use it to advance a draft requirement: completing one clears its draft status. Task completion alone does not establish requirement completion.',
 )]
-class SetRequirementCompletionTool extends Tool
+class RequirementSetCompletionTool extends Tool
 {
     public function handle(Request $request): Response|ResponseFactory
     {
@@ -32,23 +34,29 @@ class SetRequirementCompletionTool extends Tool
             'is_complete' => ['required', 'boolean'],
         ]);
 
-        $requirement = (new Requirement())->resolveRouteBinding($validated['id']);
-
-        if (! $requirement || ! $request->user()->can('update', $requirement)) {
+        try {
+            $requirement = (new Requirement())->resolveRouteBinding($validated['id']);
+        } catch (ModelNotFoundException) {
             return Response::error('Requirement not found or cannot be edited.');
         }
 
-        if ($validated['is_complete']) {
-            if ($requirement->is_blocked) {
-                throw ValidationException::withMessages([
-                    'id' => 'Requirements cannot be completed while blocked.',
-                ]);
-            }
-
-            $requirement->complete();
-        } else {
-            $requirement->reopen();
+        if (!$request->user()->can('update', $requirement)) {
+            return Response::error('Requirement not found or cannot be edited.');
         }
+
+        DB::transaction(function () use ($requirement, $validated) {
+            if ($validated['is_complete']) {
+                if ($requirement->is_blocked) {
+                    throw ValidationException::withMessages([
+                        'id' => 'Requirements cannot be completed while blocked.',
+                    ]);
+                }
+
+                $requirement->complete();
+            } else {
+                $requirement->reopen();
+            }
+        });
 
         return Response::structured([
             'id' => $requirement->sqid,
@@ -63,7 +71,7 @@ class SetRequirementCompletionTool extends Tool
     {
         return [
             'id' => $schema->string()
-                ->description('The requirement ID returned by GetProjectTool, GetItemTool, or GetChangesTool.')
+                ->description('The requirement ID returned by ProjectGetTool, RequirementGetTool, or ProjectGetChangesTool.')
                 ->required(),
             'is_complete' => $schema->boolean()
                 ->description('True to mark a verified, non-draft requirement complete; false to reopen a requirement.')

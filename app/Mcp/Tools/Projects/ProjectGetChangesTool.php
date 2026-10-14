@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mcp\Tools;
+namespace App\Mcp\Tools\Projects;
 
 use App\Models\Project;
 use Carbon\Carbon;
@@ -14,14 +14,15 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('GetChangesTool')]
+#[Name('ProjectGetChangesTool')]
 #[Description(
     'Returns changes to a specification after a generated_at checkpoint. Use it to refresh previously fetched context. '
     . 'Existing entities contain only fields changed since that time, new entities are returned in full, and deleted entities contain deleted_at. '
+    . 'When a parent is deleted, discard its cached descendants even if they have no individual deletion records in the delta. Feature deletion removes its requirements and their assignments, tasks and unknowns; requirement deletion removes those child items; actor deletion removes its assignments. '
     . 'Changes to draft requirements and their child items are included, but remain non-actionable. Treat the result as a delta, not a complete specification. '
     . 'Before acting on any requirement, task, assignment, or unknown in the result, fetch or consult its parent requirement and re-check draft status, blockers, and unknowns.',
 )]
-class GetChangesTool extends Tool
+class ProjectGetChangesTool extends Tool
 {
     /**
      * Handle the tool request.
@@ -75,11 +76,11 @@ class GetChangesTool extends Tool
         return [
 
             'id' => $schema->string()
-                ->description('The specification ID returned by ListProjectsTool or GetProjectTool.')
+                ->description('The specification ID returned by ProjectListTool or ProjectGetTool.')
                 ->required(),
 
             'since' => $schema->string()
-                ->description('An ISO 8601 timestamp. Prefer the latest generated_at value returned by ListProjectsTool or GetProjectTool so no changes are missed.')
+                ->description('An ISO 8601 timestamp. Prefer the latest generated_at value returned by ProjectListTool or ProjectGetTool so no changes are missed.')
                 ->required(),
 
         ];

@@ -109,6 +109,10 @@ export default class Requirement extends Model {
     }
 
     onDelete() {
+        for (const relation of ['assignments', 'tasks', 'unknowns']) {
+            this.constructor.repository(relation).deleteMany(this[relation].pluck('id').all());
+        }
+
         const comment_ids = this.comments.pluck('id').toArray();
 
         this.constructor.repository('comments').deleteMany(comment_ids);

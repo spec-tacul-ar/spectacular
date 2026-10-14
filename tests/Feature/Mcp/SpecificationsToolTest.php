@@ -4,12 +4,13 @@ namespace Tests\Feature\Mcp;
 
 use App\Enums\Role;
 use App\Mcp\Servers\SpecificationsServer;
-use App\Mcp\Tools\GetChangesTool;
-use App\Mcp\Tools\GetItemTool;
-use App\Mcp\Tools\GetProjectTool;
-use App\Mcp\Tools\ListProjectAccountsTool;
-use App\Mcp\Tools\ListProjectsTool;
-use App\Mcp\Tools\SetRequirementCompletionTool;
+use App\Mcp\Tools\Projects\ProjectGetChangesTool;
+use App\Mcp\Tools\Tasks\TaskGetTool;
+use App\Mcp\Tools\Requirements\RequirementGetTool;
+use App\Mcp\Tools\Projects\ProjectGetTool;
+use App\Mcp\Tools\Projects\ProjectListAccountsTool;
+use App\Mcp\Tools\Projects\ProjectListTool;
+use App\Mcp\Tools\Requirements\RequirementSetCompletionTool;
 use App\Models\Account;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,24 +47,24 @@ class SpecificationsToolTest extends TestCase
 
     public function test_tool_descriptions_explain_when_and_how_agents_should_use_them(): void
     {
-        $this->assertStringContainsString('Treat the result as a delta', app(GetChangesTool::class)->description());
-        $this->assertStringContainsString('Changes to draft requirements and their child items are included', app(GetChangesTool::class)->description());
-        $this->assertStringContainsString('fetch or consult its parent requirement', app(GetChangesTool::class)->description());
-        $this->assertStringContainsString('fetch the parent requirement before acting', app(GetItemTool::class)->description());
-        $this->assertStringContainsString('only hint at future direction; do not work on them', app(GetProjectTool::class)->description());
-        $this->assertStringContainsString('attribute account_id values', app(ListProjectAccountsTool::class)->description());
-        $this->assertStringContainsString('IDs are opaque tool inputs', app(ListProjectsTool::class)->description());
-        $this->assertStringContainsString('Do not use it to advance a draft requirement', app(SetRequirementCompletionTool::class)->description());
+        $this->assertStringContainsString('Treat the result as a delta', app(ProjectGetChangesTool::class)->description());
+        $this->assertStringContainsString('Changes to draft requirements and their child items are included', app(ProjectGetChangesTool::class)->description());
+        $this->assertStringContainsString('fetch or consult its parent requirement', app(ProjectGetChangesTool::class)->description());
+        $this->assertStringContainsString('Fetch the parent requirement before acting', app(TaskGetTool::class)->description());
+        $this->assertStringContainsString('only hint at future direction; do not work on them', app(ProjectGetTool::class)->description());
+        $this->assertStringContainsString('attribute account_id values', app(ProjectListAccountsTool::class)->description());
+        $this->assertStringContainsString('IDs are opaque tool inputs', app(ProjectListTool::class)->description());
+        $this->assertStringContainsString('Do not use it to advance a draft requirement', app(RequirementSetCompletionTool::class)->description());
     }
 
     public function test_tools_are_exposed_with_project_tool_names(): void
     {
-        $this->assertSame('GetChangesTool', app(GetChangesTool::class)->name());
-        $this->assertSame('GetItemTool', app(GetItemTool::class)->name());
-        $this->assertSame('GetProjectTool', app(GetProjectTool::class)->name());
-        $this->assertSame('ListProjectAccountsTool', app(ListProjectAccountsTool::class)->name());
-        $this->assertSame('ListProjectsTool', app(ListProjectsTool::class)->name());
-        $this->assertSame('SetRequirementCompletionTool', app(SetRequirementCompletionTool::class)->name());
+        $this->assertSame('ProjectGetChangesTool', app(ProjectGetChangesTool::class)->name());
+        $this->assertSame('RequirementGetTool', app(RequirementGetTool::class)->name());
+        $this->assertSame('ProjectGetTool', app(ProjectGetTool::class)->name());
+        $this->assertSame('ProjectListAccountsTool', app(ProjectListAccountsTool::class)->name());
+        $this->assertSame('ProjectListTool', app(ProjectListTool::class)->name());
+        $this->assertSame('RequirementSetCompletionTool', app(RequirementSetCompletionTool::class)->name());
     }
 
     public function test_list_specifications_returns_object_structured_content(): void
@@ -75,7 +76,7 @@ class SpecificationsToolTest extends TestCase
         $this->attachCollaboration($account, $project, Role::OWNER);
 
         SpecificationsServer::actingAs($account)
-            ->tool(ListProjectsTool::class)
+            ->tool(ProjectListTool::class)
             ->assertOk()
             ->assertStructuredContent(
                 fn(AssertableJson $json) => $json
@@ -107,7 +108,7 @@ class SpecificationsToolTest extends TestCase
         $this->attachCollaboration($editor, $project, Role::EDITOR);
 
         SpecificationsServer::actingAs($owner)
-            ->tool(ListProjectAccountsTool::class, [
+            ->tool(ProjectListAccountsTool::class, [
                 'id' => $project->sqid,
             ])
             ->assertOk()
@@ -137,7 +138,7 @@ class SpecificationsToolTest extends TestCase
         $otherAccount = Account::factory()->create();
 
         SpecificationsServer::actingAs($otherAccount)
-            ->tool(ListProjectAccountsTool::class, [
+            ->tool(ProjectListAccountsTool::class, [
                 'id' => $fixture['project']->sqid,
             ])
             ->assertHasErrors(['Project not found.']);
@@ -151,7 +152,7 @@ class SpecificationsToolTest extends TestCase
         $project = $fixture['project'];
 
         $response = SpecificationsServer::actingAs($fixture['account'])
-            ->tool(GetChangesTool::class, [
+            ->tool(ProjectGetChangesTool::class, [
                 'id' => $project->sqid,
                 'since' => now()->toISOString(),
             ])
@@ -167,7 +168,7 @@ class SpecificationsToolTest extends TestCase
         $fixture = $this->createProjectFixture();
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(GetChangesTool::class, [
+            ->tool(ProjectGetChangesTool::class, [
                 'id' => $fixture['project']->sqid,
                 'since' => now()->addSecond()->toISOString(),
             ])
@@ -210,7 +211,7 @@ class SpecificationsToolTest extends TestCase
         ]);
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(GetChangesTool::class, [
+            ->tool(ProjectGetChangesTool::class, [
                 'id' => $fixture['project']->sqid,
                 'since' => $since,
             ])
@@ -249,7 +250,7 @@ class SpecificationsToolTest extends TestCase
         $fixture['task']->update(['name' => 'Updated tentative task']);
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(GetChangesTool::class, [
+            ->tool(ProjectGetChangesTool::class, [
                 'id' => $fixture['project']->sqid,
                 'since' => $since,
             ])
@@ -278,7 +279,7 @@ class SpecificationsToolTest extends TestCase
         $fixture['task']->delete();
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(GetChangesTool::class, [
+            ->tool(ProjectGetChangesTool::class, [
                 'id' => $fixture['project']->sqid,
                 'since' => $since,
             ])
@@ -306,7 +307,7 @@ class SpecificationsToolTest extends TestCase
             'description' => '<p>Updated feature description.</p>',
         ]);
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(GetProjectTool::class, [
+            ->tool(ProjectGetTool::class, [
                 'id' => $fixture['project']->sqid,
             ])
             ->assertOk()
@@ -314,12 +315,14 @@ class SpecificationsToolTest extends TestCase
                 fn(AssertableJson $json) => $json
                 ->where('id', $fixture['project']->sqid)
                 ->where('name', 'Updated project')
+                ->where('locale', $fixture['project']->fresh()->locale)
                 ->where('description', 'Updated project description.')
                 ->where('actors.0.id', $fixture['projectActor']->sqid)
                 ->where('features.0.id', $fixture['feature']->sqid)
                 ->where('features.0.name', 'Updated feature')
                 ->where('features.0.description', 'Updated feature description.')
                 ->where('features.0.requirements.0.id', $fixture['requirement']->sqid)
+                ->where('features.0.requirements.0.name', $fixture['requirement']->name)
                 ->has('features.0.requirements.0.completed_at')
                 ->has('features.0.requirements.0.activity_at')
                 ->where('features.0.requirements.0.is_complete', false)
@@ -339,7 +342,7 @@ class SpecificationsToolTest extends TestCase
         $otherAccount = Account::factory()->create();
 
         SpecificationsServer::actingAs($otherAccount)
-            ->tool(GetProjectTool::class, [
+            ->tool(ProjectGetTool::class, [
                 'id' => $fixture['project']->sqid,
             ])
             ->assertHasErrors(['Project not found.']);
@@ -355,7 +358,7 @@ class SpecificationsToolTest extends TestCase
         $this->travelTo('2026-08-18 10:01:00');
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(SetRequirementCompletionTool::class, [
+            ->tool(RequirementSetCompletionTool::class, [
                 'id' => $fixture['requirement']->sqid,
                 'is_complete' => true,
             ])
@@ -372,9 +375,8 @@ class SpecificationsToolTest extends TestCase
         $completedAt = $fixture['requirement']->fresh()->completed_at->toJSON();
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(GetItemTool::class, [
+            ->tool(RequirementGetTool::class, [
                 'id' => $fixture['requirement']->sqid,
-                'type' => 'requirement',
             ])
             ->assertOk()
             ->assertStructuredContent(
@@ -386,7 +388,7 @@ class SpecificationsToolTest extends TestCase
             );
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(SetRequirementCompletionTool::class, [
+            ->tool(RequirementSetCompletionTool::class, [
                 'id' => $fixture['requirement']->sqid,
                 'is_complete' => false,
             ])
@@ -411,7 +413,7 @@ class SpecificationsToolTest extends TestCase
         $fixture['requirement']->update(['blocked_reason' => 'Waiting on access', 'is_draft' => true]);
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(SetRequirementCompletionTool::class, [
+            ->tool(RequirementSetCompletionTool::class, [
                 'id' => $fixture['requirement']->sqid,
                 'is_complete' => true,
             ])
@@ -428,7 +430,7 @@ class SpecificationsToolTest extends TestCase
 
         foreach ([true, false] as $isComplete) {
             SpecificationsServer::actingAs($fixture['account'])
-                ->tool(SetRequirementCompletionTool::class, [
+                ->tool(RequirementSetCompletionTool::class, [
                     'id' => $fixture['requirement']->sqid,
                     'is_complete' => $isComplete,
                 ])
