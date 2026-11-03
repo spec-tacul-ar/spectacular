@@ -13,15 +13,15 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('UnknownGetTool')]
+#[Name('unknown-get')]
 #[Description(
     'Returns one unresolved product question, including its wording and parent requirement ID. '
-    . 'Fetch the parent requirement before acting with RequirementGetTool and consult the full specification for the relevant product context. '
+    . 'Fetch the parent requirement before acting with requirement-get and consult the full specification for the relevant product context. '
     . 'Do not invent an answer or implement work under a draft parent. '
-    . 'Once the user or established evidence provides an answer, UnknownResolveTool appends that clarification and removes the question. '
+    . 'Once the user or established evidence provides an answer, unknown-resolve appends that clarification and removes the question. '
     . 'Supply since to include revisions strictly after an ISO 8601 checkpoint; omit it for current state only. '
     . 'History entries identify their timestamp, author account and AI flag, and contain previous field values. '
-    . 'Use ProjectListAccountsTool to attribute authors. '
+    . 'Use project-list-accounts to attribute authors. '
     . 'IDs are opaque tool inputs. '
     . 'This tool is read-only; it cannot alter the specification, feedback or history.',
 )]

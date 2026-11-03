@@ -14,7 +14,7 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('ProjectGetChangesTool')]
+#[Name('project-get-changes')]
 #[Description(
     'Returns changes to a specification after a generated_at checkpoint. Use it to refresh previously fetched context. '
     . 'Existing entities contain only fields changed since that time, new entities are returned in full, and deleted entities contain deleted_at. '
@@ -76,11 +76,11 @@ class ProjectGetChangesTool extends Tool
         return [
 
             'id' => $schema->string()
-                ->description('The specification ID returned by ProjectListTool or ProjectGetTool.')
+                ->description('The specification ID returned by project-list or project-get.')
                 ->required(),
 
             'since' => $schema->string()
-                ->description('An ISO 8601 timestamp. Prefer the latest generated_at value returned by ProjectListTool or ProjectGetTool so no changes are missed.')
+                ->description('An ISO 8601 timestamp. Prefer the latest generated_at value returned by project-list or project-get so no changes are missed.')
                 ->required(),
 
         ];

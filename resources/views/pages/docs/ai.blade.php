@@ -47,6 +47,8 @@
 
         <p>The Spectacular MCP server lets agents inspect, author and organise specifications, track task progress, resolve unknowns and update requirement completion. Writing requires owner or editor access to an active project.</p>
 
+        <p>Use <code>search_tools</code> to find individual entity operations and <code>execute_tools</code> to call them. Project listing, the full specification, changes and account listing remain directly available.</p>
+
         <table>
             <thead>
                 <tr>
@@ -56,59 +58,59 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><code>ProjectListTool</code></td>
+                    <td><code>project-list</code></td>
                     <td>Lists the specifications available to the authenticated account.</td>
                 </tr>
                 <tr>
-                    <td><code>ProjectGetTool</code></td>
+                    <td><code>project-get</code></td>
                     <td>Returns a full specification, including users, features, requirements, tasks, blockers, and unknowns.</td>
                 </tr>
                 <tr>
-                    <td><code>ProjectGetDetailsTool</code></td>
-                    <td>Returns focused project context and metadata. Can include project revisions since a timestamp; use ProjectGetTool for the complete specification.</td>
+                    <td><code>project-get-details</code></td>
+                    <td>Returns focused project context and metadata. Can include project revisions since a timestamp; use project-get for the complete specification.</td>
                 </tr>
                 <tr>
-                    <td><code>ActorGetTool</code><br><code>FeatureGetTool</code><br><code>RequirementGetTool</code><br><code>TaskGetTool</code><br><code>AssignmentGetTool</code><br><code>UnknownGetTool</code></td>
-                    <td>Returns one entity of the named type. Each can include its revisions since a timestamp. These focused reads return description fields as stored HTML; write tools accept Markdown.</td>
+                    <td><code>actor-get</code><br><code>feature-get</code><br><code>requirement-get</code><br><code>task-get</code><br><code>assignment-get</code><br><code>unknown-get</code></td>
+                    <td>Returns one entity of the named type. Each can include its revisions since a timestamp. These focused reads return description fields as stored HTML; write tools accept HTML.</td>
                 </tr>
                 <tr>
-                    <td><code>ProjectGetChangesTool</code></td>
+                    <td><code>project-get-changes</code></td>
                     <td>Returns project entities that changed since an ISO 8601 timestamp. Clients must discard cached descendants when their parent is deleted; individual child deletion records may be omitted.</td>
                 </tr>
                 <tr>
-                    <td><code>ProjectCreateTool</code><br><code>ProjectEditTool</code></td>
+                    <td><code>project-create</code><br><code>project-edit</code></td>
                     <td>Creates or edits the specification’s product context, name and language. The creator becomes its owner. Project deletion is unavailable.</td>
                 </tr>
                 <tr>
-                    <td><code>ActorCreateTool</code><br><code>ActorEditTool</code><br><code>ActorDeleteTool</code><br><code>ActorReorderTool</code></td>
-                    <td>Manages product user roles and their display order. Detach all requirement assignments before deleting a role.</td>
+                    <td><code>actor-create</code><br><code>actor-edit</code><br><code>actor-delete</code><br><code>actor-reorder</code></td>
+                    <td>Manages product user roles and their display order. Deleting a role also soft-deletes its requirement assignments.</td>
                 </tr>
                 <tr>
-                    <td><code>FeatureCreateTool</code><br><code>FeatureEditTool</code><br><code>FeatureDeleteTool</code><br><code>FeatureReorderTool</code></td>
+                    <td><code>feature-create</code><br><code>feature-edit</code><br><code>feature-delete</code><br><code>feature-reorder</code></td>
                     <td>Manages capability groups and their display order. Removing a feature soft-deletes its specification descendants and retains feedback and history.</td>
                 </tr>
                 <tr>
-                    <td><code>RequirementCreateTool</code><br><code>RequirementEditTool</code><br><code>RequirementDeleteTool</code><br><code>RequirementMoveTool</code><br><code>RequirementReorderTool</code></td>
+                    <td><code>requirement-create</code><br><code>requirement-edit</code><br><code>requirement-delete</code><br><code>requirement-move</code><br><code>requirement-reorder</code></td>
                     <td>Manages user stories, moves them between features in the same specification and sets their display order. References are generated by the server and retained.</td>
                 </tr>
                 <tr>
-                    <td><code>TaskCreateTool</code><br><code>TaskEditTool</code><br><code>TaskDeleteTool</code><br><code>TaskMoveTool</code><br><code>TaskReorderTool</code></td>
+                    <td><code>task-create</code><br><code>task-edit</code><br><code>task-delete</code><br><code>task-move</code><br><code>task-reorder</code></td>
                     <td>Manages implementation steps, task completion and display order. Tasks can move between requirements in the same specification.</td>
                 </tr>
                 <tr>
-                    <td><code>UnknownCreateTool</code><br><code>UnknownEditTool</code><br><code>UnknownDeleteTool</code><br><code>UnknownMoveTool</code></td>
-                    <td>Manages unresolved product questions. Use UnknownResolveTool to record an established answer before removing a question.</td>
+                    <td><code>unknown-create</code><br><code>unknown-edit</code><br><code>unknown-delete</code><br><code>unknown-move</code></td>
+                    <td>Manages unresolved product questions. Use unknown-resolve to record an established answer before removing a question.</td>
                 </tr>
                 <tr>
-                    <td><code>AssignmentCreateTool</code><br><code>AssignmentDeleteTool</code></td>
+                    <td><code>assignment-create</code><br><code>assignment-delete</code></td>
                     <td>Attaches or detaches product user roles from a requirement to generate its title. These are not assignments to project collaborators.</td>
                 </tr>
                 <tr>
-                    <td><code>UnknownResolveTool</code></td>
+                    <td><code>unknown-resolve</code></td>
                     <td>Appends an established clarification to the requirement description and removes the unknown in one operation.</td>
                 </tr>
                 <tr>
-                    <td><code>RequirementSetCompletionTool</code></td>
+                    <td><code>requirement-set-completion</code></td>
                     <td>Marks an unblocked requirement as complete or reopens it.</td>
                 </tr>
             </tbody>
@@ -122,7 +124,7 @@
 
         <p>Requirement names contain only the action, such as <em>take orders</em>. Attach the <em>Waiters</em> role through an assignment to produce the title <em>Waiters can take orders</em>. Assignments refer to product users, not project collaborators.</p>
 
-        <p>Provide description fields as Markdown; the server converts them to HTML for storage and rich text display. Clarifications supplied when resolving unknowns are also converted from Markdown to HTML before being appended to the existing description. User summaries are plain text. Editing an item changes only the supplied fields; omitted fields and child items remain in place. Supplying a description replaces its current content, so include any existing content you want to retain. Use the separate tools to add or remove tasks, unknowns and assignments. To clear a nullable field, supply <code>null</code>.</p>
+        <p>Provide description fields and clarifications as HTML for storage and rich text display. Clarifications supplied when resolving unknowns are appended to the existing description. User summaries are plain text. Editing an item changes only the supplied fields; omitted fields and child items remain in place. Supplying a description replaces its current content, so include any existing content you want to retain. Use the separate tools to add or remove tasks, unknowns and assignments. To clear a nullable field, supply <code>null</code>.</p>
 
         <p>Agents may author and revise draft requirements when you ask them to write a specification. Drafts still must not be implemented or marked complete as part of development work. Completing tasks does not complete the parent requirement. Changes to a completed requirement or its related items can make it incomplete again.</p>
 

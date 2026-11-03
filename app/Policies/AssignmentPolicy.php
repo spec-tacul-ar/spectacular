@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\Assignment;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 
 class AssignmentPolicy
 {
@@ -17,4 +18,9 @@ class AssignmentPolicy
             ? Response::allow()
             : Response::denyAsNotFound();
     }
+    public function delete(Account $account, Assignment $assignment): Response
+    {
+        return Gate::forUser($account)->inspect('update', $assignment->requirement);
+    }
+
 }

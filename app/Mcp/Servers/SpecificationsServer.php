@@ -59,6 +59,7 @@ use Laravel\Mcp\Server\Tools\ToolSearch;
     . 'When the user asks to author or revise a specification, you may edit draft requirements as specification content; the restriction on drafts applies to implementation work. '
     . 'Use search_tools to discover individual entity operations and execute_tools to invoke them. '
     . 'Use the write tools only for user-authorized specification changes. Write product context, plural user roles, capability features and small user stories with acceptance criteria. '
+    . 'Use HTML for description fields and unknown clarifications. '
     . 'Requirement names contain only the action phrase; actor assignments generate their titles. Capture unresolved questions as unknowns instead of guessing. '
     . 'Writes affect only the current specification and append revisions. Comments, feedback, accounts, collaboration settings, historical revisions, permanent references and timestamps are not writable. '
     . 'Deletion is soft and preserves history; project deletion, purging, restoring and rewriting history are unavailable. '

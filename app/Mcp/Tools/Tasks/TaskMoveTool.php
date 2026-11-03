@@ -5,7 +5,6 @@ namespace App\Mcp\Tools\Tasks;
 use App\Models\Requirement;
 use App\Models\Task;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
@@ -21,11 +20,11 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
-#[Name('TaskMoveTool')]
+#[Name('task-move')]
 #[Description(
     'Moves a task into another requirement within the same active specification. '
     . 'Existing IDs, content and revisions are retained; a new revision records the parent change. '
-    . 'It appends to destination display order; use TaskReorderTool afterwards. '
+    . 'It appends to destination display order; use task-reorder afterwards. '
     . 'Cross-specification moves are forbidden. '
     . 'Both source and destination require edit access. '
     . 'Moving changes activity on both parents and can invalidate completion. '
@@ -40,9 +39,9 @@ class TaskMoveTool extends Tool
             'id' => ['required', 'string'],
             'requirement_id' => ['required', 'string'],
         ]);
-        try {
-            $task = (new Task())->resolveRouteBinding($validated['id']);
-        } catch (ModelNotFoundException) {
+        $task_id = $request->decodeSqid('id');
+        $task = $task_id === null ? null : Task::find($task_id);
+        if (!$task) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
@@ -50,9 +49,9 @@ class TaskMoveTool extends Tool
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
-        try {
-            $requirement = (new Requirement())->resolveRouteBinding($validated['requirement_id']);
-        } catch (ModelNotFoundException) {
+        $requirement_id = $request->decodeSqid('requirement_id');
+        $requirement = $requirement_id === null ? null : Requirement::find($requirement_id);
+        if (!$requirement) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
@@ -71,12 +70,7 @@ class TaskMoveTool extends Tool
                 $old_requirement->trackActivity();
             });
         }
-        $task->refresh();
-
-        $result = $task->obfuscateIdentifiers($task->attributesToArray());
-        unset($result['history'], $result['uuid']);
-
-        return Response::structured($result);
+        return Response::structured(['success' => true]);
     }
 
     public function schema(JsonSchema $schema): array

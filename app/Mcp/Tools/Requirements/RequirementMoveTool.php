@@ -5,9 +5,7 @@ namespace App\Mcp\Tools\Requirements;
 use App\Models\Feature;
 use App\Models\Requirement;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -22,12 +20,12 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
-#[Name('RequirementMoveTool')]
+#[Name('requirement-move')]
 #[Description(
     'Moves a requirement into another feature within the same active specification. '
     . 'Existing IDs, content and revisions are retained; a new revision records the parent change. '
     . 'The permanent reference and all assignments, tasks and unknowns move with it. '
-    . 'It appends to destination display order; use RequirementReorderTool afterwards. '
+    . 'It appends to destination display order; use requirement-reorder afterwards. '
     . 'Cross-specification moves are forbidden. '
     . 'Both source and destination require edit access. '
     . 'Moving changes activity on both parents and can invalidate completion. '
@@ -42,9 +40,9 @@ class RequirementMoveTool extends Tool
             'id' => ['required', 'string'],
             'feature_id' => ['required', 'string'],
         ]);
-        try {
-            $requirement = (new Requirement())->resolveRouteBinding($validated['id']);
-        } catch (ModelNotFoundException) {
+        $requirement_id = $request->decodeSqid('id');
+        $requirement = $requirement_id === null ? null : Requirement::find($requirement_id);
+        if (!$requirement) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
@@ -52,9 +50,9 @@ class RequirementMoveTool extends Tool
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
-        try {
-            $feature = (new Feature())->resolveRouteBinding($validated['feature_id']);
-        } catch (ModelNotFoundException) {
+        $feature_id = $request->decodeSqid('feature_id');
+        $feature = $feature_id === null ? null : Feature::find($feature_id);
+        if (!$feature) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
@@ -73,13 +71,7 @@ class RequirementMoveTool extends Tool
                 $old_feature->trackActivity();
             });
         }
-        $requirement->refresh();
-
-        $result = $requirement->obfuscateIdentifiers($requirement->attributesToArray());
-        unset($result['history'], $result['uuid']);
-        $result['description'] = Str::htmlToMarkdown($result['description'] ?? '');
-
-        return Response::structured([...$result, 'is_complete' => $requirement->is_complete]);
+        return Response::structured(['success' => true]);
     }
 
     public function schema(JsonSchema $schema): array

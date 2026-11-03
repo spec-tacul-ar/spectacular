@@ -11,14 +11,16 @@ use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Mcp\Request as McpRequest;
 use Laravel\Passport\Passport;
 use Laravel\Passport\Token;
+use Sqids\SqidsInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -77,7 +79,20 @@ class AppServiceProvider extends ServiceProvider
             'requirement' => Requirement::class,
         ]);
 
-        Request::macro('isMcp', fn() => app()->bound('mcp.request'));
+        HttpRequest::macro('isMcp', fn() => app()->bound('mcp.request'));
+
+        McpRequest::macro('decodeSqid', function (string $field): ?int {
+            $sqid = $this->get($field);
+
+            if (!is_string($sqid)) {
+                return null;
+            }
+
+            $sqids = app(SqidsInterface::class);
+            $ids = $sqids->decode($sqid);
+
+            return count($ids) === 1 && $sqids->encode($ids) === $sqid ? $ids[0] : null;
+        });
 
         // Don't let the HTTP Host header dictate URLs.
         URL::useOrigin(config('app.url'));

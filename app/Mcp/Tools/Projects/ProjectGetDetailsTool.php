@@ -13,15 +13,15 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('ProjectGetDetailsTool')]
+#[Name('project-get-details')]
 #[Description(
     'Returns focused project-level context and metadata, including the name, description and language, optionally with project revisions. '
-    . 'This complements ProjectGetTool, which returns the complete specification with actors, features, requirements and their child items. '
-    . 'Use ProjectGetTool before planning or implementation; use this tool for focused inspection of changed project fields and their history. '
-    . 'Description fields are returned as stored HTML; write tools accept Markdown and convert it to HTML. '
+    . 'This complements project-get, which returns the complete specification with actors, features, requirements and their child items. '
+    . 'Use project-get before planning or implementation; use this tool for focused inspection of changed project fields and their history. '
+    . 'Description fields are returned as stored HTML; write tools accept HTML. '
     . 'Supply since to include revisions strictly after an ISO 8601 checkpoint; omit it for current state only. '
     . 'History entries identify their timestamp, author account and AI flag, and contain previous field values. '
-    . 'Use ProjectListAccountsTool to attribute authors. '
+    . 'Use project-list-accounts to attribute authors. '
     . 'IDs are opaque tool inputs. '
     . 'This tool is read-only; it cannot alter the specification, feedback or history.',
 )]

@@ -4,10 +4,8 @@ namespace App\Mcp\Tools\Unknowns;
 
 use App\Models\Unknown;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -22,12 +20,12 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(true)]
 #[IsOpenWorld(false)]
-#[Name('UnknownResolveTool')]
+#[Name('unknown-resolve')]
 #[Description(
     'Resolves one unanswered product question by appending an established clarification to its requirement description and soft-deleting the unknown, atomically. '
     . 'Read the parent requirement and obtain the answer from the user or established evidence first; never invent an answer. '
     . 'The existing description is retained. '
-    . 'Provide the clarification as Markdown; the server converts it to HTML before appending it to the stored description. The combined HTML must fit within the 10000-character description limit. '
+    . 'Provide the clarification as HTML; it is appended to the stored description. The combined HTML must fit within the 10000-character description limit. '
     . 'The question and revisions remain in history; comments and feedback are untouched. '
     . 'Requires owner/editor access to an active specification. '
     . 'This changes requirement activity and can invalidate completion. '
@@ -41,18 +39,18 @@ class UnknownResolveTool extends Tool
             'id' => ['required', 'string'],
             'clarification' => ['required', 'string', 'max:10000'],
         ]);
-        try {
-            $unknown = (new Unknown())->resolveRouteBinding($validated['id']);
-        } catch (ModelNotFoundException) {
+        $unknown_id = $request->decodeSqid('id');
+        $unknown = $unknown_id === null ? null : Unknown::find($unknown_id);
+        if (!$unknown) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
         if (!$request->user()->can('update', $unknown)) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
-        $html = Str::markdown($validated['clarification'], ['html_input' => 'strip', 'allow_unsafe_links' => false]);
+        $html = $validated['clarification'];
 
-        [$requirement, $unknown] = DB::transaction(function () use ($request, $unknown, $html) {
+        DB::transaction(function () use ($request, $unknown, $html) {
             // Lock the parent first, then recheck the question: it may have moved or
             // been removed while this request was waiting for another writer.
             $requirement = $unknown->requirement()->lockForUpdate()->first();
@@ -69,25 +67,16 @@ class UnknownResolveTool extends Tool
             $requirement->update(['description' => $description]);
             $unknown->delete();
 
-            return [$requirement, $unknown];
         });
 
-        $requirement->refresh();
-        $result = $requirement->obfuscateIdentifiers($requirement->attributesToArray());
-        unset($result['history'], $result['uuid']);
-        $result['description'] = Str::htmlToMarkdown($result['description'] ?? '');
-
-        return Response::structured([
-            'requirement' => [...$result, 'is_complete' => $requirement->is_complete],
-            'unknown' => ['id' => $unknown->sqid, 'deleted_at' => $unknown->deleted_at],
-        ]);
+        return Response::structured(['success' => true]);
     }
 
     public function schema(JsonSchema $schema): array
     {
         return [
             'id' => $schema->string()->description('Opaque ID of the unresolved unknown, obtained from a read tool.')->required(),
-            'clarification' => $schema->string()->description('The established answer in Markdown, phrased as requirement behaviour or acceptance criteria. Converted to HTML and appended to the existing stored description; the combined HTML must not exceed 10000 characters.')->required(),
+            'clarification' => $schema->string()->description('The established answer in HTML, phrased as requirement behaviour or acceptance criteria. Appended to the existing stored description; the combined HTML must not exceed 10000 characters.')->required(),
         ];
     }
 }

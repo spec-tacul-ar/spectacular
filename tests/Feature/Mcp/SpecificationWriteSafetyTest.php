@@ -88,10 +88,10 @@ class SpecificationWriteSafetyTest extends TestCase
         $this->interleaveDescriptionEdit($fixture, $concurrent_description);
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => 'Answer A.'])->assertOk();
+            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => '<p>Answer A.</p>'])->assertOk();
 
         $requirement = Requirement::withHistory()->findOrFail($fixture['requirement']->id);
-        $this->assertSame($concurrent_description . "<p>Answer A.</p>\n", $requirement->description);
+        $this->assertSame($concurrent_description . '<p>Answer A.</p>', $requirement->description);
         $this->assertSame($concurrent_description, $requirement->history->last()['data']['description']);
         $this->assertSoftDeleted($fixture['unknown']);
         $unknown = Unknown::withTrashed()->withHistory()->findOrFail($fixture['unknown']->id);
@@ -106,7 +106,7 @@ class SpecificationWriteSafetyTest extends TestCase
         $this->interleaveDescriptionEdit($fixture, $concurrent_description);
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => 'Answer A.'])->assertHasErrors();
+            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => '<p>Answer A.</p>'])->assertHasErrors();
 
         $this->assertSame($concurrent_description, $fixture['requirement']->fresh()->description);
         $this->assertNotSoftDeleted($fixture['unknown']);
@@ -125,7 +125,7 @@ class SpecificationWriteSafetyTest extends TestCase
         });
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => 'Answer A.'])
+            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => '<p>Answer A.</p>'])
             ->assertHasErrors(['Deletion failed.']);
 
         $stored = Requirement::withHistory()->findOrFail($requirement->id);
@@ -149,7 +149,7 @@ class SpecificationWriteSafetyTest extends TestCase
         });
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => 'Answer A.'])
+            ->tool(UnknownResolveTool::class, ['id' => $fixture['unknown']->sqid, 'clarification' => '<p>Answer A.</p>'])
             ->assertHasErrors(['Item not found or cannot be edited.']);
 
         $this->assertSame($original_description, $fixture['requirement']->fresh()->description);
@@ -174,7 +174,7 @@ class SpecificationWriteSafetyTest extends TestCase
 
         if ($editor === 'mcp') {
             SpecificationsServer::actingAs($fixture['account'])->tool(RequirementEditTool::class, [
-                'id' => $fixture['requirement']->sqid, 'data' => ['description' => 'Replacement.'],
+                'id' => $fixture['requirement']->sqid, 'description' => '<p>Replacement.</p>',
             ])->assertOk();
         } else {
             $this->actingAsAccount($fixture['account']);

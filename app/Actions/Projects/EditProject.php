@@ -29,9 +29,9 @@ class EditProject
     public function rules(): array
     {
         return [
-            'description' => ['nullable', 'string', 'max:10000'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:10000'],
             'locale' => ['sometimes', 'string', new SupportedLocaleRule()],
-            'name' => ['required', 'string', 'max:250', new SluggableNameRule()],
+            'name' => ['sometimes', 'required', 'string', 'max:250', new SluggableNameRule()],
         ];
     }
 

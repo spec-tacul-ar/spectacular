@@ -4,6 +4,7 @@ namespace App\Actions\Features;
 
 use Illuminate\Auth\Access\Response as GateResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\FeatureResource;
 use App\Models\Feature;
 use Illuminate\Routing\Router;
@@ -28,18 +29,19 @@ class EditFeature
     public function rules(): array
     {
         return [
-            'description' => ['nullable', 'string', 'max:10000'],
-            'name' => ['required', 'string', 'max:250'],
-            'project_id' => ['prohibited'],
-            'weight' => ['nullable', 'integer', 'between:0,250'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:10000'],
+            'name' => ['sometimes', 'required', 'string', 'max:250'],
+            'weight' => ['sometimes', 'nullable', 'integer', 'between:0,250'],
         ];
     }
 
     public function handle(Feature $feature, array $validated): Feature
     {
-        $feature->update($validated);
+        return DB::transaction(function () use ($feature, $validated) {
+            $feature->update($validated);
 
-        return $feature;
+            return $feature;
+        });
     }
 
     public function asController(ActionRequest $request, Feature $feature): FeatureResource

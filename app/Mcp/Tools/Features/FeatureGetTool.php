@@ -13,14 +13,14 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('FeatureGetTool')]
+#[Name('feature-get')]
 #[Description(
     'Returns one capability group, including its name, description and specification ID. '
-    . 'Use it to inspect context and boundaries for a changed feature; use ProjectGetTool for its requirements and the full product context. '
-    . 'Description fields are returned as stored HTML; write tools accept Markdown and convert it to HTML. '
+    . 'Use it to inspect context and boundaries for a changed feature; use project-get for its requirements and the full product context. '
+    . 'Description fields are returned as stored HTML; write tools accept HTML. '
     . 'Supply since to include revisions strictly after an ISO 8601 checkpoint; omit it for current state only. '
     . 'History entries identify their timestamp, author account and AI flag, and contain previous field values. '
-    . 'Use ProjectListAccountsTool to attribute authors. '
+    . 'Use project-list-accounts to attribute authors. '
     . 'IDs are opaque tool inputs. '
     . 'This tool is read-only; it cannot alter the specification, feedback or history.',
 )]

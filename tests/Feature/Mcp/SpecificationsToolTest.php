@@ -59,12 +59,12 @@ class SpecificationsToolTest extends TestCase
 
     public function test_tools_are_exposed_with_project_tool_names(): void
     {
-        $this->assertSame('ProjectGetChangesTool', app(ProjectGetChangesTool::class)->name());
-        $this->assertSame('RequirementGetTool', app(RequirementGetTool::class)->name());
-        $this->assertSame('ProjectGetTool', app(ProjectGetTool::class)->name());
-        $this->assertSame('ProjectListAccountsTool', app(ProjectListAccountsTool::class)->name());
-        $this->assertSame('ProjectListTool', app(ProjectListTool::class)->name());
-        $this->assertSame('RequirementSetCompletionTool', app(RequirementSetCompletionTool::class)->name());
+        $this->assertSame('project-get-changes', app(ProjectGetChangesTool::class)->name());
+        $this->assertSame('requirement-get', app(RequirementGetTool::class)->name());
+        $this->assertSame('project-get', app(ProjectGetTool::class)->name());
+        $this->assertSame('project-list-accounts', app(ProjectListAccountsTool::class)->name());
+        $this->assertSame('project-list', app(ProjectListTool::class)->name());
+        $this->assertSame('requirement-set-completion', app(RequirementSetCompletionTool::class)->name());
     }
 
     public function test_list_specifications_returns_object_structured_content(): void
@@ -316,11 +316,11 @@ class SpecificationsToolTest extends TestCase
                 ->where('id', $fixture['project']->sqid)
                 ->where('name', 'Updated project')
                 ->where('locale', $fixture['project']->fresh()->locale)
-                ->where('description', 'Updated project description.')
+                ->where('description', '<p>Updated project description.</p>')
                 ->where('actors.0.id', $fixture['projectActor']->sqid)
                 ->where('features.0.id', $fixture['feature']->sqid)
                 ->where('features.0.name', 'Updated feature')
-                ->where('features.0.description', 'Updated feature description.')
+                ->where('features.0.description', '<p>Updated feature description.</p>')
                 ->where('features.0.requirements.0.id', $fixture['requirement']->sqid)
                 ->where('features.0.requirements.0.name', $fixture['requirement']->name)
                 ->has('features.0.requirements.0.completed_at')
@@ -364,12 +364,7 @@ class SpecificationsToolTest extends TestCase
             ])
             ->assertOk()
             ->assertStructuredContent(
-                fn(AssertableJson $json) => $json
-                    ->where('id', $fixture['requirement']->sqid)
-                    ->where('is_complete', true)
-                    ->where('is_draft', false)
-                    ->has('completed_at')
-                    ->has('activity_at'),
+                fn(AssertableJson $json) => $json->where('success', true),
             );
 
         $completedAt = $fixture['requirement']->fresh()->completed_at->toJSON();
@@ -394,12 +389,7 @@ class SpecificationsToolTest extends TestCase
             ])
             ->assertOk()
             ->assertStructuredContent(
-                fn(AssertableJson $json) => $json
-                    ->where('id', $fixture['requirement']->sqid)
-                    ->where('completed_at', null)
-                    ->where('is_complete', false)
-                    ->where('is_draft', false)
-                    ->has('activity_at'),
+                fn(AssertableJson $json) => $json->where('success', true),
             );
 
         $this->assertNull($fixture['requirement']->fresh()->completed_at);

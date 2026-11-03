@@ -28,6 +28,30 @@ class RequirementDraftTest extends TestCase
         $this->assertDatabaseHas('requirements', ['name' => 'plan the next phase', 'is_draft' => true]);
     }
 
+    public function test_partial_requirement_edit_preserves_omitted_fields_and_children(): void
+    {
+        $fixture = $this->createProjectFixture(Role::EDITOR);
+        $this->actingAsAccount($fixture['account']);
+        $originalDescription = $fixture['requirement']->description;
+
+        $this->postJson('/api/requirements/' . $fixture['requirement']->sqid . '/edit', [
+            'name' => 'updated action',
+        ])->assertOk();
+
+        $this->assertSame('updated action', $fixture['requirement']->fresh()->name);
+        $this->assertSame($originalDescription, $fixture['requirement']->fresh()->description);
+        $this->assertDatabaseHas('assignments', ['id' => $fixture['assignment']->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('tasks', ['id' => $fixture['task']->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('unknowns', ['id' => $fixture['unknown']->id, 'deleted_at' => null]);
+
+        $this->postJson('/api/requirements/' . $fixture['requirement']->sqid . '/edit', [
+            'name' => '',
+        ])->assertUnprocessable()->assertJsonValidationErrors('name');
+        $this->postJson('/api/requirements/' . $fixture['requirement']->sqid . '/edit', [
+            'tasks' => [['is_complete' => true]],
+        ])->assertUnprocessable()->assertJsonValidationErrors('tasks.0.name');
+    }
+
     public function test_draft_can_be_toggled_when_editing(): void
     {
         $fixture = $this->createProjectFixture(Role::EDITOR);

@@ -33,6 +33,7 @@ class CreateProject
         return [
             'actors' => ['array', 'max:25'],
             'actors.*' => ['string', 'max:250'],
+            'description' => ['nullable', 'string', 'max:10000'],
             'features' => ['array', 'max:25'],
             'features.*' => ['string', 'max:250'],
             'locale' => ['sometimes', 'string', new SupportedLocaleRule()],

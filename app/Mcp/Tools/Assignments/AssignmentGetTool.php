@@ -13,15 +13,15 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('AssignmentGetTool')]
+#[Name('assignment-get')]
 #[Description(
     'Returns one link between a product user role and a requirement, including actor_id and requirement_id. '
     . 'This is not assignment of implementation work to a collaborator or account. '
-    . 'Use ActorGetTool to inspect the role and fetch the parent requirement before acting with RequirementGetTool. '
+    . 'Use actor-get to inspect the role and fetch the parent requirement before acting with requirement-get. '
     . 'Do not implement work for a draft parent requirement; consult the full specification for its blockers and unknowns. '
     . 'Supply since to include revisions strictly after an ISO 8601 checkpoint; omit it for current state only. '
     . 'History entries identify their timestamp, author account and AI flag, and contain previous field values. '
-    . 'Use ProjectListAccountsTool to attribute authors. '
+    . 'Use project-list-accounts to attribute authors. '
     . 'IDs are opaque tool inputs. '
     . 'This tool is read-only; it cannot alter the specification, feedback or history.',
 )]

@@ -2,6 +2,9 @@
 
 namespace App\Mcp\Tools\Requirements;
 
+use App\Actions\Requirements\CompleteRequirement;
+use App\Actions\Requirements\ReopenRequirement;
+
 use App\Models\Requirement;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,7 +23,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
-#[Name('RequirementSetCompletionTool')]
+#[Name('requirement-set-completion')]
 #[Description(
     'Marks an unblocked requirement complete or reopens it. Call this only after checking the current requirement and only when the user-authorized work has been implemented and verified. '
     . 'Do not use it to advance a draft requirement: completing one clears its draft status. Task completion alone does not establish requirement completion.',
@@ -44,34 +47,18 @@ class RequirementSetCompletionTool extends Tool
             return Response::error('Requirement not found or cannot be edited.');
         }
 
-        DB::transaction(function () use ($requirement, $validated) {
-            if ($validated['is_complete']) {
-                if ($requirement->is_blocked) {
-                    throw ValidationException::withMessages([
-                        'id' => 'Requirements cannot be completed while blocked.',
-                    ]);
-                }
+        DB::transaction(fn() => $validated['is_complete']
+            ? (new CompleteRequirement())->handle($requirement)
+            : (new ReopenRequirement())->handle($requirement));
 
-                $requirement->complete();
-            } else {
-                $requirement->reopen();
-            }
-        });
-
-        return Response::structured([
-            'id' => $requirement->sqid,
-            'activity_at' => $requirement->activity_at,
-            'completed_at' => $requirement->completed_at,
-            'is_complete' => $requirement->is_complete,
-            'is_draft' => $requirement->is_draft,
-        ]);
+        return Response::structured(['success' => true]);
     }
 
     public function schema(JsonSchema $schema): array
     {
         return [
             'id' => $schema->string()
-                ->description('The requirement ID returned by ProjectGetTool, RequirementGetTool, or ProjectGetChangesTool.')
+                ->description('The requirement ID returned by project-get, requirement-get, or project-get-changes.')
                 ->required(),
             'is_complete' => $schema->boolean()
                 ->description('True to mark a verified, non-draft requirement complete; false to reopen a requirement.')

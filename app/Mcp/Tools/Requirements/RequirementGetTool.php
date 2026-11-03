@@ -13,16 +13,16 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('RequirementGetTool')]
+#[Name('requirement-get')]
 #[Description(
     'Returns one requirement with its action phrase, generated title, description, source, permanent reference, draft status, blocker and activity/completion timestamps. '
     . 'Inspect the current requirement before editing, implementing or reporting progress. '
     . 'Draft requirements and their tasks must not be implemented. '
-    . 'Use ProjectGetTool for complete context, including assignments, tasks and unresolved unknowns. '
-    . 'Description fields are returned as stored HTML; write tools accept Markdown and convert it to HTML. '
+    . 'Use project-get for complete context, including assignments, tasks and unresolved unknowns. '
+    . 'Description fields are returned as stored HTML; write tools accept HTML. '
     . 'Supply since to include revisions strictly after an ISO 8601 checkpoint; omit it for current state only. '
     . 'History entries identify their timestamp, author account and AI flag, and contain previous field values. '
-    . 'Use ProjectListAccountsTool to attribute authors. '
+    . 'Use project-list-accounts to attribute authors. '
     . 'IDs are opaque tool inputs. '
     . 'This tool is read-only; it cannot alter the specification, feedback or history.',
 )]

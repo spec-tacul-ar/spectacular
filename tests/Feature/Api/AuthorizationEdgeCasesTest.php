@@ -20,6 +20,25 @@ class AuthorizationEdgeCasesTest extends TestCase
     use BuildsApiFixtures;
     use RefreshDatabase;
 
+    public function test_requirement_edit_ignores_a_forged_top_level_id_for_nested_validation(): void
+    {
+        $fixture = $this->createProjectFixture(Role::EDITOR);
+        $other = Requirement::factory()->for($fixture['feature'])->create();
+        $task = Task::factory()->for($other)->create(['name' => 'Other task']);
+        $unknown = Unknown::factory()->for($other)->create(['name' => 'Other question']);
+        $this->actingAsAccount($fixture['account']);
+
+        $this->postJson('/api/requirements/' . $fixture['requirement']->sqid . '/edit', [
+            'id' => $other->id,
+            'tasks' => [['id' => $task->sqid, 'name' => 'Hijacked task']],
+            'unknowns' => [['id' => $unknown->sqid, 'name' => 'Hijacked question']],
+        ])->assertUnprocessable()->assertJsonValidationErrors(['tasks.0.id', 'unknowns.0.id']);
+
+        $this->assertSame('Other task', $task->fresh()->name);
+        $this->assertSame('Other question', $unknown->fresh()->name);
+        $this->assertDatabaseHas('requirements', ['id' => $fixture['requirement']->id]);
+    }
+
     public function test_features_cannot_be_reassigned_to_a_project_the_actor_cannot_edit(): void
     {
         $sourceProject = Project::factory()->create();
@@ -34,11 +53,12 @@ class AuthorizationEdgeCasesTest extends TestCase
         $this->postJson('/api/features/' . $feature->sqid . '/edit', [
             'name' => 'Moved feature',
             'project_id' => $targetProject->sqid,
-        ])->assertUnprocessable()->assertJsonValidationErrors('project_id');
+        ])->assertSuccessful();
 
         $this->assertDatabaseHas('features', [
             'id' => $feature->id,
             'project_id' => $sourceProject->id,
+            'name' => 'Moved feature',
         ]);
     }
 

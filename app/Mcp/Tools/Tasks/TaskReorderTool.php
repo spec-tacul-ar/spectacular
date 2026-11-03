@@ -4,7 +4,6 @@ namespace App\Mcp\Tools\Tasks;
 
 use App\Models\Requirement;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
@@ -20,7 +19,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
-#[Name('TaskReorderTool')]
+#[Name('task-reorder')]
 #[Description(
     'Sets the display order of all tasks in one requirement. '
     . 'Provide every current task ID under that parent exactly once in the desired order. '
@@ -40,9 +39,9 @@ class TaskReorderTool extends Tool
             'ids' => ['present', 'array', 'max:251'],
             'ids.*' => ['required', 'string', 'distinct:strict'],
         ]);
-        try {
-            $requirement = (new Requirement())->resolveRouteBinding($validated['requirement_id']);
-        } catch (ModelNotFoundException) {
+        $requirement_id = $request->decodeSqid('requirement_id');
+        $requirement = $requirement_id === null ? null : Requirement::find($requirement_id);
+        if (!$requirement) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
@@ -52,7 +51,7 @@ class TaskReorderTool extends Tool
 
         $ids = $validated['ids'];
 
-        $result = DB::transaction(function () use ($requirement, $ids) {
+        DB::transaction(function () use ($requirement, $ids) {
             $items = $requirement->tasks()->lockForUpdate()->get()->keyBy('sqid');
             if (count($items) !== count($ids) || array_diff($ids, $items->keys()->all())) {
                 throw ValidationException::withMessages(['ids' => 'Provide every current sibling ID exactly once.']);
@@ -60,11 +59,9 @@ class TaskReorderTool extends Tool
             foreach (array_values($ids) as $weight => $id) {
                 $items[$id]->update(['weight' => $weight]);
             }
-
-            return collect($ids)->map(fn($id) => ['id' => $id, 'weight' => $items[$id]->weight])->all();
         });
 
-        return Response::structured(['items' => $result]);
+        return Response::structured(['success' => true]);
     }
 
     public function schema(JsonSchema $schema): array

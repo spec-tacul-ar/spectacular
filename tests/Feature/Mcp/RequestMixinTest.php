@@ -16,6 +16,20 @@ class RequestMixinTest extends TestCase
     use BuildsApiFixtures;
     use RefreshDatabase;
 
+    public function test_mcp_request_decodes_canonical_single_sqids(): void
+    {
+        $sqids = app(\Sqids\SqidsInterface::class);
+        $request = new \Laravel\Mcp\Request(['project_id' => $sqids->encode([42]), 'name' => 'Actors']);
+        $this->assertSame(42, $request->decodeSqid('project_id'));
+        $this->assertSame(['project_id' => $sqids->encode([42]), 'name' => 'Actors'], $request->all());
+
+        foreach (['invalid-id', $sqids->encode([42, 43]), '', null, 42, [], true] as $sqid) {
+            $request = new \Laravel\Mcp\Request(['project_id' => $sqid]);
+            $this->assertNull($request->decodeSqid('project_id'));
+            $this->assertSame($sqid, $request->get('project_id'));
+        }
+    }
+
     public function test_ordinary_requests_are_not_mcp_requests(): void
     {
         $this->assertFalse(request()->isMcp());
@@ -37,7 +51,7 @@ class RequestMixinTest extends TestCase
             'method' => 'tools/call',
             'params' => [
                 'name' => 'execute_tools',
-                'arguments' => ['calls' => [['name' => 'FeatureEditTool', 'arguments' => ['id' => $fixture['feature']->sqid, 'data' => ['name' => 'Updated via MCP']]]]],
+                'arguments' => ['calls' => [['name' => 'feature-edit', 'arguments' => ['id' => $fixture['feature']->sqid, 'name' => 'Updated via MCP']]]],
             ],
         ])->assertOk()->streamedContent();
 
@@ -68,7 +82,7 @@ class RequestMixinTest extends TestCase
         });
 
         SpecificationsServer::actingAs($fixture['account'])
-            ->tool(FeatureEditTool::class, ['id' => $feature->sqid, 'data' => ['name' => 'Fail this write']])
+            ->tool(FeatureEditTool::class, ['id' => $feature->sqid, 'name' => 'Fail this write'])
             ->assertHasErrors(['Write failed.']);
 
         $this->assertFalse(request()->isMcp());

@@ -13,14 +13,14 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('ActorGetTool')]
+#[Name('actor-get')]
 #[Description(
     'Returns one product user role, including its name, plain-text summary and specification ID. '
     . 'Roles such as Waiters or Managers describe product users, not accounts or project collaborators. '
-    . 'Use this for focused inspection of a role mentioned in a delta; use ProjectGetTool for the full specification and its requirement assignments. '
+    . 'Use this for focused inspection of a role mentioned in a delta; use project-get for the full specification and its requirement assignments. '
     . 'Supply since to include revisions strictly after an ISO 8601 checkpoint; omit it for current state only. '
     . 'History entries identify their timestamp, author account and AI flag, and contain previous field values. '
-    . 'Use ProjectListAccountsTool to attribute authors. '
+    . 'Use project-list-accounts to attribute authors. '
     . 'IDs are opaque tool inputs. '
     . 'This tool is read-only; it cannot alter the specification, feedback or history.',
 )]

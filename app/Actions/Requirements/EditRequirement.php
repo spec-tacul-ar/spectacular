@@ -35,7 +35,7 @@ class EditRequirement
 
     public function prepareForValidation(ActionRequest $request): void
     {
-        $request->merge(['requirement_id' => $request->route('requirement')->id]);
+        $request->merge(['id' => $request->route('requirement')->id]);
 
         if (!$request->has('feature_id')) {
             $request->merge(['feature_id' => $request->route('requirement')->feature_id]);
@@ -45,37 +45,37 @@ class EditRequirement
     public function rules(): array
     {
         return [
-            'actor_ids' => ['present', 'array'],
+            'actor_ids' => ['sometimes', 'array'],
             'actor_ids.*' => ['integer', new SharesRelation(Actor::class, 'feature_id', 'project.features'), new Authorised('update', Actor::class)],
-            'blocked_reason' => ['present', 'nullable', 'string', 'max:250'],
-            'description' => ['present', 'nullable', 'string', 'max:10000'],
+            'blocked_reason' => ['sometimes', 'nullable', 'string', 'max:250'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:10000'],
             'feature_id' => ['bail', 'required', 'integer', new Authorised('update', Feature::class)],
             'is_draft' => ['sometimes', 'boolean'],
-            'name' => ['required', 'string', 'max:250'],
-            'source' => ['present', 'nullable', 'string', 'max:250'],
-            'tasks' => ['present', 'array'],
+            'name' => ['sometimes', 'required', 'string', 'max:250'],
+            'source' => ['sometimes', 'nullable', 'string', 'max:250'],
+            'tasks' => ['sometimes', 'array'],
             'tasks.*.id' => [
                 'sometimes',
                 'bail',
                 'required',
                 'integer',
                 new Authorised('update', Task::class),
-                new SharesRelation(Task::class, 'requirement_id', 'requirement'),
+                new SharesRelation(Task::class, 'id', 'requirement'),
             ],
             'tasks.*.is_complete' => ['nullable', 'boolean'],
             'tasks.*.name' => ['required', 'string', 'max:250'],
             'tasks.*.weight' => ['nullable', 'integer', 'min:0', 'max:250'],
-            'unknowns' => ['present', 'array'],
+            'unknowns' => ['sometimes', 'array'],
             'unknowns.*.id' => [
                 'sometimes',
                 'bail',
                 'required',
                 'integer',
                 new Authorised('update', Unknown::class),
-                new SharesRelation(Unknown::class, 'requirement_id', 'requirement'),
+                new SharesRelation(Unknown::class, 'id', 'requirement'),
             ],
             'unknowns.*.name' => ['required', 'string', 'max:250'],
-            'weight' => ['nullable', 'integer', 'between:0,250'],
+            'weight' => ['sometimes', 'nullable', 'integer', 'between:0,250'],
         ];
     }
 

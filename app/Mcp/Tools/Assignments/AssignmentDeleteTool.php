@@ -2,10 +2,10 @@
 
 namespace App\Mcp\Tools\Assignments;
 
+use App\Actions\Assignments\DeleteAssignment;
+
 use App\Models\Assignment;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -20,7 +20,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(true)]
 #[IsOpenWorld(false)]
-#[Name('AssignmentDeleteTool')]
+#[Name('assignment-delete')]
 #[Description(
     'Soft-deletes a current assignment and records its removal while retaining prior revisions. '
     . 'Detaches a product user role from its requirement, updating the generated title. '
@@ -28,7 +28,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
     . 'Removal can invalidate requirement completion. '
     . 'Comments and feedback are retained. '
     . 'No purge, restore, rollback or history edits are available. '
-    . 'Returns the opaque ID and deletion timestamp; live clients receive removal events. '
+    . 'Returns success; live clients receive removal events. '
     . 'Only owners/editors may write to active specifications. '
     . 'Writes append revisions and cannot change comments, feedback, accounts, collaborators, timestamps or history.',
 )]
@@ -36,20 +36,15 @@ class AssignmentDeleteTool extends Tool
 {
     public function handle(Request $request): Response|ResponseFactory
     {
-        $validated = $request->validate(['id' => ['required', 'string']]);
-        try {
-            $assignment = (new Assignment())->resolveRouteBinding($validated['id']);
-        } catch (ModelNotFoundException) {
-            throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
+        $assignment = Assignment::find($request->decodeSqid('id'));
+
+        if (!$assignment || !$request->user()->can('delete', $assignment)) {
+            throw ValidationException::withMessages(['id' => 'Item not found or cannot be deleted.']);
         }
 
-        if (!$request->user()->can('update', $assignment->requirement)) {
-            throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
-        }
+        (new DeleteAssignment())->handle($assignment);
 
-        DB::transaction(fn() => $assignment->delete());
-
-        return Response::structured(['id' => $assignment->sqid, 'deleted_at' => $assignment->deleted_at]);
+        return Response::structured(['success' => true]);
     }
 
     public function schema(JsonSchema $schema): array

@@ -42,7 +42,7 @@ class EntityReadToolsTest extends TestCase
         } while ($cursor);
 
         $this->assertNotContains('GetItemTool', $names);
-        $this->assertContains('ProjectGetTool', $names);
+        $this->assertContains('project-get', $names);
         $this->assertContains('search_tools', $names);
         $this->assertContains('execute_tools', $names);
         foreach ($this->tools() as $class => $fixture_key) {

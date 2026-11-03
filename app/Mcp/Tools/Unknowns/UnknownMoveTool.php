@@ -5,7 +5,6 @@ namespace App\Mcp\Tools\Unknowns;
 use App\Models\Requirement;
 use App\Models\Unknown;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
@@ -21,7 +20,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly(false)]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
-#[Name('UnknownMoveTool')]
+#[Name('unknown-move')]
 #[Description(
     'Moves a unknown into another requirement within the same active specification. '
     . 'Existing IDs, content and revisions are retained; a new revision records the parent change. '
@@ -39,9 +38,9 @@ class UnknownMoveTool extends Tool
             'id' => ['required', 'string'],
             'requirement_id' => ['required', 'string'],
         ]);
-        try {
-            $unknown = (new Unknown())->resolveRouteBinding($validated['id']);
-        } catch (ModelNotFoundException) {
+        $unknown_id = $request->decodeSqid('id');
+        $unknown = $unknown_id === null ? null : Unknown::find($unknown_id);
+        if (!$unknown) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
@@ -49,9 +48,9 @@ class UnknownMoveTool extends Tool
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
-        try {
-            $requirement = (new Requirement())->resolveRouteBinding($validated['requirement_id']);
-        } catch (ModelNotFoundException) {
+        $requirement_id = $request->decodeSqid('requirement_id');
+        $requirement = $requirement_id === null ? null : Requirement::find($requirement_id);
+        if (!$requirement) {
             throw ValidationException::withMessages(['id' => 'Item not found or cannot be edited.']);
         }
 
@@ -69,12 +68,7 @@ class UnknownMoveTool extends Tool
                 $old_requirement->trackActivity();
             });
         }
-        $unknown->refresh();
-
-        $result = $unknown->obfuscateIdentifiers($unknown->attributesToArray());
-        unset($result['history'], $result['uuid']);
-
-        return Response::structured($result);
+        return Response::structured(['success' => true]);
     }
 
     public function schema(JsonSchema $schema): array

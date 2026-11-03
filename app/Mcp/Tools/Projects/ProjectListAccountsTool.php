@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[IsReadOnly]
-#[Name('ProjectListAccountsTool')]
+#[Name('project-list-accounts')]
 #[Description('Returns the names and IDs of accounts associated with a specification. Use it only when you need to attribute account_id values in item history to collaborators.')]
 class ProjectListAccountsTool extends Tool
 {
@@ -56,7 +56,7 @@ class ProjectListAccountsTool extends Tool
     {
         return [
             'id' => $schema->string()
-                ->description('The specification ID returned by ProjectListTool or ProjectGetTool.')
+                ->description('The specification ID returned by project-list or project-get.')
                 ->required(),
         ];
     }

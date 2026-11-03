@@ -27,7 +27,7 @@ class EditUnknown
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:250'],
+            'name' => ['sometimes', 'required', 'string', 'max:250'],
         ];
     }
 
