@@ -3,7 +3,7 @@
 namespace Tests\Feature\Mcp;
 
 use App\Enums\Role;
-use App\Mcp\Servers\SpecificationsServer;
+use Tests\Support\DirectSpecificationsServer as SpecificationsServer;
 use App\Mcp\Tools\Actors\ActorGetTool;
 use App\Mcp\Tools\Assignments\AssignmentGetTool;
 use App\Mcp\Tools\Features\FeatureGetTool;
@@ -43,9 +43,17 @@ class EntityReadToolsTest extends TestCase
 
         $this->assertNotContains('GetItemTool', $names);
         $this->assertContains('ProjectGetTool', $names);
+        $this->assertContains('search_tools', $names);
+        $this->assertContains('execute_tools', $names);
         foreach ($this->tools() as $class => $fixture_key) {
             $tool = app($class)->toArray();
-            $this->assertContains($tool['name'], $names);
+            $this->assertNotContains($tool['name'], $names);
+            $response = $this->postJson('/mcp/specifications', [
+                'jsonrpc' => '2.0', 'id' => 2, 'method' => 'tools/call',
+                'params' => ['name' => 'search_tools', 'arguments' => ['query' => $tool['name']]],
+            ])->assertOk();
+            $catalog = json_decode($response->json('result.content.0.text'), true);
+            $this->assertSame($tool['name'], $catalog['tools'][0]['name']);
             $this->assertTrue($tool['annotations']['readOnlyHint']);
             $this->assertSame(['id', 'since'], array_keys($tool['inputSchema']['properties']));
             $this->assertSame(['id'], $tool['inputSchema']['required']);

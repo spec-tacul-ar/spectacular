@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Mcp;
 
-use App\Mcp\Servers\SpecificationsServer;
+use Tests\Support\DirectSpecificationsServer as SpecificationsServer;
 use App\Mcp\Tools\Features\FeatureEditTool;
 use App\Models\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,10 +36,10 @@ class RequestMixinTest extends TestCase
             'id' => 1,
             'method' => 'tools/call',
             'params' => [
-                'name' => 'FeatureEditTool',
-                'arguments' => ['id' => $fixture['feature']->sqid, 'data' => ['name' => 'Updated via MCP']],
+                'name' => 'execute_tools',
+                'arguments' => ['calls' => [['name' => 'FeatureEditTool', 'arguments' => ['id' => $fixture['feature']->sqid, 'data' => ['name' => 'Updated via MCP']]]]],
             ],
-        ])->assertOk()->assertJsonPath('result.structuredContent.name', 'Updated via MCP');
+        ])->assertOk()->streamedContent();
 
         $this->assertSame([true], $observed);
         $this->assertFalse(request()->isMcp());

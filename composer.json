@@ -12,7 +12,7 @@
         "laravel/folio": "^1.1",
         "laravel/fortify": "^1.25",
         "laravel/framework": "^13.0",
-        "laravel/mcp": "^0.9.3",
+        "laravel/mcp": "^1.0",
         "laravel/passport": "^13.0",
         "laravel/reverb": "^1.10",
         "laravel/socialite": "^5.27",

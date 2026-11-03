@@ -3,7 +3,7 @@
 namespace Tests\Feature\Mcp;
 
 use App\Events\ProjectItemDeleted;
-use App\Mcp\Servers\SpecificationsServer;
+use Tests\Support\DirectSpecificationsServer as SpecificationsServer;
 use App\Mcp\Tools\Features\FeatureDeleteTool;
 use App\Mcp\Tools\Requirements\RequirementDeleteTool;
 use App\Mcp\Tools\Requirements\RequirementEditTool;

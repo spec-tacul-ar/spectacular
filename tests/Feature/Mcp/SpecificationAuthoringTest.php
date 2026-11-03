@@ -5,7 +5,7 @@ namespace Tests\Feature\Mcp;
 use App\Enums\Role;
 use App\Events\ProjectItemDeleted;
 use App\Events\ProjectItemSaved;
-use App\Mcp\Servers\SpecificationsServer;
+use Tests\Support\DirectSpecificationsServer as SpecificationsServer;
 use App\Mcp\Tools\Actors\ActorDeleteTool;
 use App\Mcp\Tools\Actors\ActorReorderTool;
 use App\Mcp\Tools\Assignments\AssignmentCreateTool;
@@ -49,15 +49,24 @@ class SpecificationAuthoringTest extends TestCase
             $names = [...$names, ...collect($response->json('result.tools'))->pluck('name')->all()];
             $cursor = $response->json('result.nextCursor');
         } while ($cursor);
-        foreach (['ProjectCreateTool', 'ActorCreateTool', 'FeatureCreateTool', 'RequirementCreateTool', 'TaskCreateTool', 'UnknownCreateTool', 'AssignmentCreateTool', 'RequirementEditTool', 'AssignmentDeleteTool', 'RequirementMoveTool', 'ActorReorderTool', 'UnknownResolveTool'] as $name) {
-            $this->assertContains($name, $names);
-        }
-        $this->postJson('/mcp/specifications', [
+        $this->assertContains('search_tools', $names);
+        $this->assertContains('execute_tools', $names);
+        $this->assertNotContains('FeatureCreateTool', $names);
+        $search = $this->postJson('/mcp/specifications', [
             'jsonrpc' => '2.0', 'id' => 2, 'method' => 'tools/call',
-            'params' => ['name' => 'FeatureCreateTool', 'arguments' => [
-                'project_id' => $fixture['project']->sqid, 'data' => ['name' => 'Ordering'],
-            ]],
-        ])->assertOk()->assertJsonPath('result.structuredContent.name', 'Ordering');
+            'params' => ['name' => 'search_tools', 'arguments' => ['query' => 'FeatureCreateTool']],
+        ])->assertOk();
+        $catalog = json_decode($search->json('result.content.0.text'), true);
+        $this->assertSame('FeatureCreateTool', $catalog['tools'][0]['name']);
+        $response = $this->postJson('/mcp/specifications', [
+            'jsonrpc' => '2.0', 'id' => 3, 'method' => 'tools/call',
+            'params' => ['name' => 'execute_tools', 'arguments' => ['calls' => [[
+                'name' => 'FeatureCreateTool', 'arguments' => [
+                    'project_id' => $fixture['project']->sqid, 'data' => ['name' => 'Ordering'],
+                ],
+            ]]]],
+        ])->assertOk();
+        $this->assertStringContainsString('\"ok\":true', $response->streamedContent());
         $this->assertDatabaseHas('features', ['project_id' => $fixture['project']->id, 'name' => 'Ordering']);
     }
 

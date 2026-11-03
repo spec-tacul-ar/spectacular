@@ -3,7 +3,7 @@
 namespace Tests\Feature\Mcp;
 
 use App\Enums\Role;
-use App\Mcp\Servers\SpecificationsServer;
+use Tests\Support\DirectSpecificationsServer as SpecificationsServer;
 use App\Mcp\Tools\Projects\ProjectGetChangesTool;
 use App\Mcp\Tools\Tasks\TaskGetTool;
 use App\Mcp\Tools\Requirements\RequirementGetTool;

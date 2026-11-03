@@ -45,6 +45,7 @@ use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Attributes\Version;
+use Laravel\Mcp\Server\Tools\ToolSearch;
 
 #[Name('Specifications Server')]
 #[Version('0.2.0')]
@@ -56,6 +57,7 @@ use Laravel\Mcp\Server\Attributes\Version;
     . 'Tasks are implementation steps, and their completion does not mean the parent requirement is complete. '
     . 'Only mark a requirement complete after its stated behaviour has been implemented and verified. '
     . 'When the user asks to author or revise a specification, you may edit draft requirements as specification content; the restriction on drafts applies to implementation work. '
+    . 'Use search_tools to discover individual entity operations and execute_tools to invoke them. '
     . 'Use the write tools only for user-authorized specification changes. Write product context, plural user roles, capability features and small user stories with acceptance criteria. '
     . 'Requirement names contain only the action phrase; actor assignments generate their titles. Capture unresolved questions as unknowns instead of guessing. '
     . 'Writes affect only the current specification and append revisions. Comments, feedback, accounts, collaboration settings, historical revisions, permanent references and timestamps are not writable. '
@@ -66,45 +68,47 @@ use Laravel\Mcp\Server\Attributes\Version;
 class SpecificationsServer extends Server
 {
     protected array $tools = [
-        ActorCreateTool::class,
-        ActorDeleteTool::class,
-        ActorEditTool::class,
-        ActorGetTool::class,
-        ActorReorderTool::class,
-        AssignmentCreateTool::class,
-        AssignmentDeleteTool::class,
-        AssignmentGetTool::class,
-        FeatureCreateTool::class,
-        FeatureDeleteTool::class,
-        FeatureEditTool::class,
-        FeatureGetTool::class,
-        FeatureReorderTool::class,
-        ProjectCreateTool::class,
-        ProjectEditTool::class,
         ProjectGetChangesTool::class,
-        ProjectGetDetailsTool::class,
         ProjectGetTool::class,
         ProjectListAccountsTool::class,
         ProjectListTool::class,
-        RequirementCreateTool::class,
-        RequirementDeleteTool::class,
-        RequirementEditTool::class,
-        RequirementGetTool::class,
-        RequirementMoveTool::class,
-        RequirementReorderTool::class,
-        RequirementSetCompletionTool::class,
-        TaskCreateTool::class,
-        TaskDeleteTool::class,
-        TaskEditTool::class,
-        TaskGetTool::class,
-        TaskMoveTool::class,
-        TaskReorderTool::class,
-        UnknownCreateTool::class,
-        UnknownDeleteTool::class,
-        UnknownEditTool::class,
-        UnknownGetTool::class,
-        UnknownMoveTool::class,
-        UnknownResolveTool::class,
+        ToolSearch::class => [
+            ActorCreateTool::class,
+            ActorDeleteTool::class,
+            ActorEditTool::class,
+            ActorGetTool::class,
+            ActorReorderTool::class,
+            AssignmentCreateTool::class,
+            AssignmentDeleteTool::class,
+            AssignmentGetTool::class,
+            FeatureCreateTool::class,
+            FeatureDeleteTool::class,
+            FeatureEditTool::class,
+            FeatureGetTool::class,
+            FeatureReorderTool::class,
+            ProjectCreateTool::class,
+            ProjectEditTool::class,
+            ProjectGetDetailsTool::class,
+            RequirementCreateTool::class,
+            RequirementDeleteTool::class,
+            RequirementEditTool::class,
+            RequirementGetTool::class,
+            RequirementMoveTool::class,
+            RequirementReorderTool::class,
+            RequirementSetCompletionTool::class,
+            TaskCreateTool::class,
+            TaskDeleteTool::class,
+            TaskEditTool::class,
+            TaskGetTool::class,
+            TaskMoveTool::class,
+            TaskReorderTool::class,
+            UnknownCreateTool::class,
+            UnknownDeleteTool::class,
+            UnknownEditTool::class,
+            UnknownGetTool::class,
+            UnknownMoveTool::class,
+            UnknownResolveTool::class,
+        ],
     ];
 
     protected array $resources = [
